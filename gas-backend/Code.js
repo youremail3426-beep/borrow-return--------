@@ -130,7 +130,7 @@ function doPost(e) {
     }
     else if (path.match(/^\/reservations\/(.+)\/pickup/) && method === 'POST') {
       const id = path.split('/')[2];
-      result = Reservation.confirmPickup(id);
+      result = Reservation.confirmPickup(id, body.adminId);
     }
     else if (path === '/reservations/delete' && method === 'POST') {
       result = Reservation.bulkDelete(body.ids);

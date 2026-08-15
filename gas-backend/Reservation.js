@@ -162,7 +162,7 @@ const Reservation = {
     return updatedRes;
   },
 
-  confirmPickup(id) {
+  confirmPickup(id, adminId) {
     if (!id) throw new Error('ID is required');
     
     const reservation = Database.getById(this.SHEET_NAME, id);
@@ -175,7 +175,7 @@ const Reservation = {
       borrowerId: reservation.borrowerId,
       borrowDate: new Date().toISOString(),
       dueDate: reservation.returnDate,
-      adminId: 'system', // Or get from request
+      adminId: adminId || 'system',
       notes: 'From Reservation',
     };
 
