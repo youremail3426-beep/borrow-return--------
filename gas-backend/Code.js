@@ -70,6 +70,23 @@ function doPost(e) {
     const method = postData.method || 'POST';
     const path = postData.path || e.parameter.path || '';
     const body = postData.body || {};
+    const token = postData.token || e.parameter.token || '';
+    
+    let currentAdminId = '';
+    if (token) {
+      try {
+        const decodedBytes = Utilities.base64Decode(token);
+        const decodedStr = Utilities.newBlob(decodedBytes).getDataAsString();
+        currentAdminId = decodedStr.split(':')[0];
+        
+        // Inject into body for endpoints that need it
+        if (!body.adminId) {
+          body.adminId = currentAdminId;
+        }
+      } catch(err) {
+        // ignore invalid token
+      }
+    }
     
     let result = {};
 
