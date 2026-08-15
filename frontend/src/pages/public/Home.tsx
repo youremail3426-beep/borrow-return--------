@@ -30,8 +30,8 @@ export default function Home() {
         } else {
             const query = search.toLowerCase();
             setEquipments(allEquipments.filter(item => 
-                item.name.toLowerCase().includes(query) || 
-                item.serialNumber.toLowerCase().includes(query)
+                (item?.name && String(item.name).toLowerCase().includes(query)) || 
+                (item?.serialNumber && String(item.serialNumber).toLowerCase().includes(query))
             ));
         }
     }, [search, allEquipments]);

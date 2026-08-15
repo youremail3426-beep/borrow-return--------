@@ -88,8 +88,10 @@ export default function AdminBorrowReturn() {
         setSearchQuery(query);
         if (query.length > 0) {
             const filtered = allEquipments.filter(eq => 
-                (eq.name && String(eq.name).toLowerCase().includes(query)) || 
-                (eq.serialNumber && String(eq.serialNumber).toLowerCase().includes(query))
+                eq && (
+                    (eq.name && String(eq.name).toLowerCase().includes(query)) || 
+                    (eq.serialNumber && String(eq.serialNumber).toLowerCase().includes(query))
+                )
             );
             setSearchResults(filtered);
         } else { 
@@ -220,8 +222,10 @@ export default function AdminBorrowReturn() {
             setFilteredBorrowers(activeBorrows);
         } else {
             const filtered = activeBorrows.filter(b =>
-                String(b.borrowerName || '').toLowerCase().includes(query) ||
-                String(b.borrowerEmail || '').toLowerCase().includes(query)
+                b && (
+                    String(b.borrowerName || '').toLowerCase().includes(query) ||
+                    String(b.borrowerEmail || '').toLowerCase().includes(query)
+                )
             );
             setFilteredBorrowers(filtered);
         }

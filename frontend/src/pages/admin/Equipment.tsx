@@ -34,8 +34,10 @@ export default function AdminEquipment() {
         } else {
             const lowerSearch = search.toLowerCase();
             const filtered = allEquipments.filter(eq => 
-                (eq.name && String(eq.name).toLowerCase().includes(lowerSearch)) || 
-                (eq.serialNumber && String(eq.serialNumber).toLowerCase().includes(lowerSearch))
+                eq && (
+                    (eq.name && String(eq.name).toLowerCase().includes(lowerSearch)) || 
+                    (eq.serialNumber && String(eq.serialNumber).toLowerCase().includes(lowerSearch))
+                )
             );
             setEquipments(filtered);
         }

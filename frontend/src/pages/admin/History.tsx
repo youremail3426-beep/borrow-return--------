@@ -116,8 +116,10 @@ export default function AdminHistory() {
 
     const filteredTransactions = transactions.filter(tx => {
         const q = searchQuery.toLowerCase();
-        const matchesSearch = String(tx.borrowerName || '').toLowerCase().includes(q) || 
-                              String(tx.borrowerEmail || '').toLowerCase().includes(q);
+        const matchesSearch = tx && (
+            String(tx.borrowerName || '').toLowerCase().includes(q) || 
+            String(tx.borrowerEmail || '').toLowerCase().includes(q)
+        );
         
         if (!matchesSearch) return false;
 
