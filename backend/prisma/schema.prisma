@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite does not support Enums, so we use Strings
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  borrowTransactions BorrowTransaction[]
+}
+
+model Borrower {
+  id            String   @id @default(uuid())
+  studentId     String   @unique
+  name          String
+  email         String
+  yearLevel     String?
+  department    String?
+  faculty       String?
+  phoneNumber   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  reservations  Reservation[]
+  transactions  BorrowTransaction[]
+}
+
+model Equipment {
+  id           String          @id @default(uuid())
+  name         String
+  serialNumber String          @unique
+  imageUrl     String?
+  status       String          @default("AVAILABLE") // AVAILABLE, RESERVED, BORROWED
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  // Relations
+  reservationItems ReservationItem[]
+  borrowItems      BorrowItem[]
+}
+
+model Reservation {
+  id            String            @id @default(uuid())
+  borrowerId    String
+  borrower      Borrower          @relation(fields: [borrowerId], references: [id])
+  borrowDate    DateTime
+  returnDate    DateTime
+  status        String            @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  // Relations
+  items ReservationItem[]
+}
+
+model ReservationItem {
+  id            String      @id @default(uuid())
+  reservationId String
+  equipmentId   String
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  equipment     Equipment   @relation(fields: [equipmentId], references: [id])
+
+  @@unique([reservationId, equipmentId])
+}
+
+model BorrowTransaction {
+  id            String    @id @default(uuid())
+  borrowerId    String
+  borrower      Borrower  @relation(fields: [borrowerId], references: [id])
+  borrowDate    DateTime
+  dueDate       DateTime
+  returnedDate      DateTime?
+  notes             String?
+  conditionImageUrl String?
+  adminId           String
+  admin             Admin     @relation(fields: [adminId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  items BorrowItem[]
+}
+
+model BorrowItem {
+  id            String            @id @default(uuid())
+  transactionId String
+  equipmentId   String
+  returnedAt    DateTime?
+  transaction   BorrowTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  equipment     Equipment         @relation(fields: [equipmentId], references: [id])
+}

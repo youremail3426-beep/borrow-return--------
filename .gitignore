@@ -1,0 +1,9 @@
+node_modules/
+.env
+*.zip
+*.db
+*.csv
+test_logo.png
+extract_logo.js
+backend/node_modules/
+frontend-web/node_modules/
