@@ -297,7 +297,9 @@ export default function PrintBorrowForm() {
                             </div>
                             <div className="flex items-end w-[280px] mb-2">
                                 <span className="w-[50px] text-right mr-2">(</span>
-                                <div className="flex-1 border-b border-dotted border-gray-600 text-center text-blue-900 pb-0.5"></div>
+                                <div className="flex-1 border-b border-dotted border-gray-600 text-center text-blue-900 pb-0.5">
+                                    {transaction.admin?.name || transaction.admin?.email || <span className="text-transparent">พิมพ์ชื่อ</span>}
+                                </div>
                                 <span className="w-[50px] text-left ml-2">)</span>
                             </div>
                             <div>ผู้ให้ยืม</div>
@@ -312,7 +314,9 @@ export default function PrintBorrowForm() {
                             </div>
                             <div className="flex items-end w-[280px] mb-2">
                                 <span className="w-[50px] text-right mr-2">(</span>
-                                <div className="flex-1 border-b border-dotted border-gray-600 pb-0.5"></div>
+                                <div className="flex-1 border-b border-dotted border-gray-600 text-center text-blue-900 pb-0.5">
+                                    {transaction.returnAdminName || <span className="text-transparent">พิมพ์ชื่อ</span>}
+                                </div>
                                 <span className="w-[50px] text-left ml-2">)</span>
                             </div>
                             <div>ผู้รับคืน</div>

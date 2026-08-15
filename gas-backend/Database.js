@@ -19,7 +19,7 @@ const Database = {
       'Equipments': ['id', 'name', 'serialNumber', 'imageUrl', 'status', 'createdAt', 'updatedAt'],
       'Reservations': ['id', 'borrowerId', 'borrowDate', 'returnDate', 'status', 'createdAt', 'updatedAt'],
       'ReservationItems': ['id', 'reservationId', 'equipmentId'],
-      'BorrowTransactions': ['id', 'borrowerId', 'borrowDate', 'dueDate', 'returnedDate', 'notes', 'conditionImageUrl', 'adminId', 'createdAt', 'updatedAt'],
+      'BorrowTransactions': ['id', 'borrowerId', 'borrowDate', 'dueDate', 'returnedDate', 'notes', 'conditionImageUrl', 'adminId', 'returnAdminName', 'createdAt', 'updatedAt'],
       'BorrowItems': ['id', 'transactionId', 'equipmentId', 'returnedAt']
     };
 

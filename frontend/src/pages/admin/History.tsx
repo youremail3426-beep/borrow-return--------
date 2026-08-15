@@ -25,6 +25,7 @@ interface Transaction {
     }[];
     admin: {
         email: string;
+        name?: string;
     };
     conditionImageUrl?: string;
     notes?: string;
@@ -388,7 +389,7 @@ export default function AdminHistory() {
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 text-xs text-gray-500">
-                                                {tx.admin?.email || 'System'}
+                                                {tx.admin?.name || tx.admin?.email || 'System'}
                                             </td>
                                             <td className="px-6 py-4 text-right flex justify-end gap-2">
                                                 {!tx.returnedDate && (

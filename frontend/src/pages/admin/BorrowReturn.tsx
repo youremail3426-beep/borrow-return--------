@@ -40,6 +40,7 @@ export default function AdminBorrowReturn() {
     const [borrowerSearchQuery, setBorrowerSearchQuery] = useState('');
     const [selectedBorrower, setSelectedBorrower] = useState<any | null>(null); // Selected User
     const [selectedReturnItemIds, setSelectedReturnItemIds] = useState<string[]>([]); // Serial numbers to return
+    const [returnAdminName, setReturnAdminName] = useState(''); // Admin who received the items
     const [isLoading, setIsLoading] = useState(false); // Loading State
     const [previewImage, setPreviewImage] = useState<string | null>(null); // Full Screen Image Preview
 
@@ -236,6 +237,7 @@ export default function AdminBorrowReturn() {
         setBorrowerSearchQuery(`${borrower.borrowerName} (${borrower.borrowerEmail})`);
         setFilteredBorrowers([]); // Hide dropdown
         setSelectedReturnItemIds([]); // Reset selection
+        setReturnAdminName(''); // Reset admin name
     };
 
     const toggleReturnItem = (serialNumber: string) => {
@@ -258,9 +260,14 @@ export default function AdminBorrowReturn() {
     const handleReturn = async () => {
         if (selectedReturnItemIds.length === 0) return Swal.fire('แจ้งเตือน', 'กรุณาเลือกอุปกรณ์ที่จะคืน', 'warning');
 
+        if (!returnAdminName.trim()) return Swal.fire('แจ้งเตือน', 'กรุณากรอกชื่อแอดมินผู้รับคืน', 'warning');
+
         setIsLoading(true);
         try {
-            await api.post('/borrow/return', { serialNumbers: selectedReturnItemIds });
+            await api.post('/borrow/return', { 
+                serialNumbers: selectedReturnItemIds,
+                returnAdminName: returnAdminName.trim()
+            });
             Swal.fire('สำเร็จ', 'บันทึกการคืนเรียบร้อย', 'success');
 
             // Refresh Data
@@ -277,6 +284,7 @@ export default function AdminBorrowReturn() {
         setBorrowerSearchQuery('');
         setFilteredBorrowers(activeBorrows);
         setSelectedReturnItemIds([]);
+        setReturnAdminName('');
     };
 
     return (
@@ -648,6 +656,20 @@ export default function AdminBorrowReturn() {
                                                 );
                                             })}
                                         </div>
+                                    </div>
+                                )}
+
+                                {/* Admin Name Input */}
+                                {selectedBorrower && selectedReturnItemIds.length > 0 && (
+                                    <div className="animate-fade-in mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">ชื่อแอดมินผู้รับคืน <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="text"
+                                            placeholder="กรอกชื่อแอดมินที่รับของ..."
+                                            className="w-full border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-orange-500/50"
+                                            value={returnAdminName}
+                                            onChange={(e) => setReturnAdminName(e.target.value)}
+                                        />
                                     </div>
                                 )}
 

@@ -140,7 +140,10 @@ const Borrow = {
         faculty: borrower.faculty || '',
         phoneNumber: borrower.phoneNumber || '',
         items: items,
-        admin: { email: admin.email || 'System' }
+        admin: { 
+          email: admin.email || 'System',
+          name: admin.name || ''
+        }
       };
     });
   },
@@ -313,7 +316,14 @@ const Borrow = {
       
       if (unreturnedItems.length === 0) {
         // All items returned, mark transaction as complete
-        Database.update(this.SHEET_NAME, txId, { returnedDate: now });
+        Database.update(this.SHEET_NAME, txId, { 
+          returnedDate: now,
+          returnAdminName: data.returnAdminName || '' 
+        });
+      } else {
+        Database.update(this.SHEET_NAME, txId, { 
+          returnAdminName: data.returnAdminName || '' 
+        });
       }
 
       // Send Return Email
