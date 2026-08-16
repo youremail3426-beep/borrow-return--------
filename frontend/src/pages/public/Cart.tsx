@@ -32,6 +32,24 @@ export default function CartPage() {
     });
 
     useEffect(() => {
+        Swal.fire({
+            icon: 'info',
+            title: 'คำแนะนำการกรอกข้อมูล',
+            html: `
+                <div style="text-align: left; font-size: 14px; line-height: 1.6;">
+                    <p>🔄 <strong>ผู้ที่เคยยืมแล้ว:</strong><br/>
+                    กรอกเพียง <b style="color: #0F5132;">รหัสนักศึกษา</b> ระบบจะดึงข้อมูลอื่นๆ ของคุณมาให้อัตโนมัติ</p>
+                    <hr style="margin: 12px 0; border: 0; border-top: 1px solid #eee;" />
+                    <p>📝 <strong>ผู้ที่ยังไม่เคยยืม (ยืมครั้งแรก):</strong><br/>
+                    กรุณากรอกข้อมูลให้ครบถ้วนทุกช่อง</p>
+                </div>
+            `,
+            confirmButtonColor: '#0F5132',
+            confirmButtonText: 'รับทราบ'
+        });
+    }, []);
+
+    useEffect(() => {
         const itemIdsFromUrl = searchParams.get('items');
         let itemIds = '';
         
