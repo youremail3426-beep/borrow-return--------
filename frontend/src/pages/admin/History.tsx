@@ -249,11 +249,11 @@ export default function AdminHistory() {
     return (
         <div className="flex min-h-screen bg-gray-100 font-sans">
             <AdminSidebar />
-            <div className="flex-1 ml-64 p-8">
-                <div className="flex items-center justify-between mb-8">
+            <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 max-w-full overflow-hidden">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 md:mb-8">
                     <div className="flex items-center gap-3">
                         <HistoryIcon size={32} className="text-primary" />
-                        <h1 className="text-3xl font-bold text-gray-800">ประวัติการยืม-คืน</h1>
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">ประวัติการยืม-คืน</h1>
                     </div>
                     {selectedIds.size > 0 && (
                         <button
@@ -261,7 +261,7 @@ export default function AdminHistory() {
                             className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-md"
                         >
                             <Trash2 size={18} />
-                            ลบ {selectedIds.size} รายการที่เลือก
+                            ลบ {selectedIds.size} รายการ
                         </button>
                     )}
                 </div>
@@ -294,7 +294,7 @@ export default function AdminHistory() {
                     </div>
 
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left">
+                        <table className="w-full text-left min-w-[1000px]">
                             <thead className="bg-white border-b">
                                 <tr>
                                     <th className="px-6 py-4 w-10">

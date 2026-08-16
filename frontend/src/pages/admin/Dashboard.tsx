@@ -118,8 +118,8 @@ export default function AdminDashboard() {
     return (
         <div className="flex min-h-screen bg-gray-100 font-sans">
             <AdminSidebar />
-            <div className="flex-1 ml-64 p-8">
-                <h1 className="text-3xl font-bold text-gray-800 mb-8">Dashboard Review</h1>
+            <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 max-w-full overflow-hidden">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 md:mb-8">Dashboard Review</h1>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <StatCard title="รออนุมัติ" value={stats.pendingReservations} color="bg-orange-500" />
@@ -138,7 +138,7 @@ export default function AdminDashboard() {
                 <div className="mt-8 bg-white rounded-xl shadow-sm p-6 border overflow-hidden">
                     <h2 className="text-xl font-bold mb-4 text-gray-800">กิจกรรมล่าสุด</h2>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left">
+                        <table className="w-full text-left min-w-[800px]">
                             <thead className="bg-gray-50 border-b border-gray-100">
                                 <tr>
                                     <th className="px-6 py-3 text-sm font-bold text-gray-600">ผู้ยืม</th>

@@ -144,9 +144,9 @@ export default function AdminEquipment() {
     return (
         <div className="flex min-h-screen bg-gray-100 font-sans">
             <AdminSidebar />
-            <div className="flex-1 ml-64 p-8">
-                <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800">จัดการอุปกรณ์</h1>
+            <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 max-w-full overflow-hidden">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 md:mb-8">
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800">จัดการอุปกรณ์</h1>
                     <button
                         onClick={() => openModal()}
                         className="bg-primary hover:bg-secondary text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 shadow-sm transition-all"
@@ -168,8 +168,8 @@ export default function AdminEquipment() {
                 </div>
 
                 {/* Table */}
-                <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-                    <table className="w-full text-left">
+                <div className="bg-white rounded-xl shadow-sm border overflow-x-auto">
+                    <table className="w-full text-left min-w-[800px]">
                         <thead className="bg-gray-50 border-b">
                             <tr>
                                 <th className="px-6 py-4 font-bold text-gray-600 w-20">รูปภาพ</th>

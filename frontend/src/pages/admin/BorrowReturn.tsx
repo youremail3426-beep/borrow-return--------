@@ -290,8 +290,8 @@ export default function AdminBorrowReturn() {
     return (
         <div className="flex min-h-screen bg-gray-100 font-sans">
             <AdminSidebar />
-            <div className="flex-1 ml-64 p-8">
-                <h1 className="text-3xl font-bold text-gray-800 mb-8">บันทึกการยืม - คืน</h1>
+            <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 max-w-full overflow-hidden">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6 md:mb-8">บันทึกการยืม - คืน</h1>
 
                 <div className="bg-white rounded-xl shadow-sm border overflow-hidden max-w-4xl mx-auto">
                     {/* TABS */}
@@ -392,7 +392,7 @@ export default function AdminBorrowReturn() {
                                         </button>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">วันที่ยืม</label>
                                         <input type="date" className="w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-primary/50"

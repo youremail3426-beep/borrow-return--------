@@ -192,9 +192,9 @@ export default function AdminReservations() {
     return (
         <div className="flex min-h-screen bg-gray-100 font-sans">
             <AdminSidebar />
-            <div className="flex-1 ml-64 p-8">
-                <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800">รายการจอง</h1>
+            <div className="flex-1 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 max-w-full overflow-hidden">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 md:mb-8">
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-800">รายการจอง</h1>
                     {selectedIds.size > 0 && (
                         <button
                             onClick={handleBulkDelete}
@@ -209,15 +209,15 @@ export default function AdminReservations() {
                             ) : (
                                 <>
                                     <Trash2 size={18} />
-                                    ลบ {selectedIds.size} รายการที่เลือก
+                                    ลบ {selectedIds.size} รายการ
                                 </>
                             )}
                         </button>
                     )}
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-                    <div className="overflow-x-auto">
+                <div className="bg-white rounded-xl shadow-sm border overflow-x-auto">
+                    <div className="min-w-[1000px]">
                         <table className="w-full text-left">
                             <thead className="bg-gray-50 border-b">
                                 <tr>
