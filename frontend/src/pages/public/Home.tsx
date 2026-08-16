@@ -16,9 +16,21 @@ export default function Home() {
     const [allEquipments, setAllEquipments] = useState<Equipment[]>([]);
     const [equipments, setEquipments] = useState<Equipment[]>([]);
     const [search, setSearch] = useState('');
-    const [selectedItems, setSelectedItems] = useState<string[]>([]);
+    const [selectedItems, setSelectedItems] = useState<string[]>(() => {
+        try {
+            const saved = localStorage.getItem('cartItems');
+            return saved ? JSON.parse(saved) : [];
+        } catch {
+            return [];
+        }
+    });
     const [loading, setLoading] = useState(true);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+    useEffect(() => {
+        localStorage.setItem('cartItems', JSON.stringify(selectedItems));
+        window.dispatchEvent(new Event('cartUpdated'));
+    }, [selectedItems]);
 
     useEffect(() => {
         fetchEquipments();
@@ -156,7 +168,7 @@ export default function Home() {
                             <span className="font-bold text-xl">{selectedItems.length} ชิ้น</span>
                         </div>
                         <Link
-                            to={`/cart?items=${selectedItems.join(',')}`}
+                            to="/cart"
                             className="bg-primary hover:bg-secondary text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-lg shadow-primary/30"
                         >
                             ดำเนินการจอง

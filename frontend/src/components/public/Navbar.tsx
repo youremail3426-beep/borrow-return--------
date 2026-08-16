@@ -1,9 +1,32 @@
 import { Link } from 'react-router-dom';
 import { ShoppingCart, LogIn } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 import logo from '../../assets/logo.png';
 
 const Navbar = () => {
+    const [cartCount, setCartCount] = useState(0);
+
+    const updateCartCount = () => {
+        try {
+            const saved = localStorage.getItem('cartItems');
+            if (saved) {
+                const items = JSON.parse(saved);
+                setCartCount(Array.isArray(items) ? items.length : 0);
+            } else {
+                setCartCount(0);
+            }
+        } catch {
+            setCartCount(0);
+        }
+    };
+
+    useEffect(() => {
+        updateCartCount();
+        window.addEventListener('cartUpdated', updateCartCount);
+        return () => window.removeEventListener('cartUpdated', updateCartCount);
+    }, []);
+
     return (
         <nav className="bg-white border-b shadow-sm sticky top-0 z-50">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -20,7 +43,11 @@ const Navbar = () => {
                         className="p-2 text-gray-600 hover:text-primary hover:bg-gray-50 rounded-full transition-all relative"
                     >
                         <ShoppingCart size={24} />
-                        {/* Cart Badge - To be implemented with state */}
+                        {cartCount > 0 && (
+                            <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+                                {cartCount}
+                            </span>
+                        )}
                     </Link>
 
                     <Link

@@ -32,15 +32,24 @@ export default function CartPage() {
     });
 
     useEffect(() => {
-        const itemIds = searchParams.get('items');
-        // Only fetch if we have IDs and haven't loaded them yet (or logic to reload)
-        // Simple logic: if IDs exist, fetch.
-        if (itemIds) {
-            // Check if we already have these items to avoid re-fetching on URL update?
-            // If we just updated URL via setSearchParams, this effect runs again.
-            // But validation is complex. Let's just fetch for now, or optimize.
-            // Optimization: If current items match IDs, don't fetch.
+        const itemIdsFromUrl = searchParams.get('items');
+        let itemIds = '';
+        
+        if (itemIdsFromUrl) {
+            itemIds = itemIdsFromUrl;
+            localStorage.setItem('cartItems', JSON.stringify(itemIds.split(',')));
+            window.dispatchEvent(new Event('cartUpdated'));
+            setSearchParams({}, { replace: true }); // Clear from URL to prefer localStorage
+        } else {
+            try {
+                const saved = localStorage.getItem('cartItems');
+                itemIds = saved ? JSON.parse(saved).join(',') : '';
+            } catch {
+                itemIds = '';
+            }
+        }
 
+        if (itemIds) {
             const currentIds = items.map(i => i.id).sort().join(',');
             const urlIds = itemIds.split(',').sort().join(',');
 
@@ -63,12 +72,18 @@ export default function CartPage() {
         const newItems = items.filter(item => item.id !== id);
         setItems(newItems);
 
-        // Update URL to match state
-        const newIds = newItems.map(i => i.id).join(',');
-        if (newIds) {
-            setSearchParams({ items: newIds });
-        } else {
-            setSearchParams({});
+        const newIdsArray = newItems.map(i => i.id);
+        localStorage.setItem('cartItems', JSON.stringify(newIdsArray));
+        window.dispatchEvent(new Event('cartUpdated'));
+
+        // Update URL if it was being used
+        const newIds = newIdsArray.join(',');
+        if (searchParams.has('items')) {
+            if (newIds) {
+                setSearchParams({ items: newIds }, { replace: true });
+            } else {
+                setSearchParams({}, { replace: true });
+            }
         }
     };
 
@@ -166,6 +181,8 @@ export default function CartPage() {
             // Clear cart and redirect
             setItems([]);
             setSearchParams({});
+            localStorage.removeItem('cartItems');
+            window.dispatchEvent(new Event('cartUpdated'));
             setFormData({
                 borrowerName: '',
                 borrowerEmail: '',
