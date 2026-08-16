@@ -290,7 +290,7 @@ export default function CartPage() {
                                     value={formData.borrowerEmail}
                                     onChange={e => handleInputChange('borrowerEmail', e.target.value)}
                                 />
-                                <div className="flex gap-2 mt-1.5">
+                                <div className="flex flex-wrap gap-2 mt-1.5">
                                     <button
                                         type="button"
                                         onClick={() => {
@@ -339,7 +339,7 @@ export default function CartPage() {
                                     onChange={e => handleInputChange('studentId', e.target.value)}
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">ชั้นปี</label>
                                     <input
@@ -361,7 +361,7 @@ export default function CartPage() {
                                     />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">ภาควิชา</label>
                                     <input
@@ -383,7 +383,7 @@ export default function CartPage() {
                                     />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">ยืมวันที่</label>
                                     <input
