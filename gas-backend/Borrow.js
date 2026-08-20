@@ -14,26 +14,15 @@ const Borrow = {
    */
   isBorrowerBlocked(borrowerId) {
     if (!borrowerId) return false;
+    const borrower = Database.getById('Borrowers', borrowerId);
+    if (!borrower) return false;
     
-    const allBorrows = this.getAllPopulated();
-    const activeTx = allBorrows.filter(tx => tx.borrowerId === borrowerId && !tx.returnedDate);
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    for (const tx of activeTx) {
-      const due = new Date(tx.dueDate);
-      due.setHours(0, 0, 0, 0);
-      
-      const diffTime = today - due;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      // If today is past the due date by 3 days or more
-      if (diffDays >= 3) {
+    if (borrower.isSuspended === true || borrower.isSuspended === 'TRUE' || borrower.isSuspended === 'true') {
+      const now = new Date();
+      if (!borrower.suspendedUntil || new Date(borrower.suspendedUntil) > now) {
         return true;
       }
     }
-    
     return false;
   },
 
@@ -224,9 +213,9 @@ const Borrow = {
       borrower = allBorrowers.find(b => b.id === borrowerId);
     }
 
-    // Block borrowing if overdue > 3 days
+    // Block borrowing if suspended
     if (borrowerId && this.isBorrowerBlocked(borrowerId)) {
-      throw new Error('ไม่สามารถทำรายการได้ เนื่องจากผู้ยืมมีอุปกรณ์ค้างส่งเกินกำหนด 3 วัน กรุณาคืนอุปกรณ์ก่อน');
+      throw new Error('ไม่สามารถทำรายการได้ เนื่องจากผู้ยืมถูกระงับสิทธิ์');
     }
 
     const transaction = {
@@ -320,6 +309,32 @@ const Borrow = {
           returnedDate: now,
           returnAdminName: data.returnAdminName || '' 
         });
+
+        // Auto-unsuspend if the user was suspended for OVERDUE and has no other overdue transactions
+        const tx = Database.getById(this.SHEET_NAME, txId);
+        if (tx && tx.borrowerId) {
+            const borrower = Database.getById('Borrowers', tx.borrowerId);
+            if (borrower && (borrower.isSuspended === true || borrower.isSuspended === 'TRUE' || borrower.isSuspended === 'true') && borrower.suspensionType === 'OVERDUE') {
+                const allBorrows = this.getAllPopulated();
+                const todayObj = new Date();
+                todayObj.setHours(0, 0, 0, 0);
+                const activeOverdue = allBorrows.filter(t => 
+                    t.borrowerId === tx.borrowerId && 
+                    !t.returnedDate && 
+                    new Date(t.dueDate) < todayObj &&
+                    t.id !== txId
+                );
+                if (activeOverdue.length === 0) {
+                    Database.update('Borrowers', tx.borrowerId, {
+                        isSuspended: false,
+                        suspensionType: '',
+                        suspensionReason: '',
+                        suspendedUntil: ''
+                    });
+                }
+            }
+        }
+
       } else {
         Database.update(this.SHEET_NAME, txId, { 
           returnAdminName: data.returnAdminName || '' 

@@ -78,9 +78,37 @@ const Reservation = {
       });
     }
     
-    // Block reservation if overdue > 3 days
-    if (borrower && borrower.id && Borrow.isBorrowerBlocked(borrower.id)) {
-      throw new Error('ไม่สามารถจองอุปกรณ์ได้ เนื่องจากคุณมีอุปกรณ์ค้างส่งเกินกำหนด 3 วัน กรุณาคืนอุปกรณ์ก่อน');
+    // Validate 7-day rule
+    const borrowDateObj = new Date(data.borrowDate);
+    borrowDateObj.setHours(0, 0, 0, 0);
+    const todayObj = new Date();
+    todayObj.setHours(0, 0, 0, 0);
+    const maxDate = new Date(todayObj);
+    maxDate.setDate(maxDate.getDate() + 7);
+
+    if (borrowDateObj > maxDate) {
+      throw new Error('สามารถทำการจองอุปกรณ์ล่วงหน้าได้ไม่เกิน 7 วัน');
+    }
+
+    // Check suspension
+    if (borrower && (borrower.isSuspended === true || borrower.isSuspended === 'TRUE' || borrower.isSuspended === 'true')) {
+      const now = new Date();
+      if (!borrower.suspendedUntil || new Date(borrower.suspendedUntil) > now) {
+        throw new Error('ท่านถูกระงับสิทธิ์การจองและการยืม (เหตุผล: ' + (borrower.suspensionReason || 'ไม่ระบุ') + ')');
+      }
+    }
+
+    // Also check if any items are actively overdue right now
+    if (borrower && borrower.id) {
+      const borrows = Database.getAll('BorrowTransactions');
+      const activeOverdue = borrows.filter(tx => 
+        tx.borrowerId === borrower.id && 
+        !tx.returnedDate && 
+        new Date(tx.dueDate) < todayObj
+      );
+      if (activeOverdue.length > 0) {
+        throw new Error('คุณมีรายการอุปกรณ์ที่เกินกำหนดคืน กรุณาคืนอุปกรณ์ก่อนทำการจองใหม่');
+      }
     }
 
     const reservation = {

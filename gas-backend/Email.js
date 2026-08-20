@@ -226,5 +226,73 @@ const Email = {
     `;
 
     this._send(borrowerEmail, subject, htmlBody);
+  },
+
+  sendSuspensionMissedPickup(borrowerEmail, borrowerName, suspendedUntil) {
+    const subject = `⚠️ แจ้งระงับสิทธิ์การจองและยืมอุปกรณ์ (Missed Pickup)`;
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img src="cid:logoImage" alt="SMO FTE Logo" style="max-width: 150px; height: auto;" />
+        </div>
+        <h2 style="color: #c0392b; text-align: center;">แจ้งระงับสิทธิ์การใช้งานระบบ</h2>
+        <p>เรียน คุณ <strong>${borrowerName}</strong>,</p>
+        <p>เนื่องจากคุณไม่ได้มารับอุปกรณ์ตามกำหนดการจอง ระบบจึงได้ทำการ <strong>ระงับสิทธิ์การจองและยืมอุปกรณ์ของคุณเป็นเวลา 3 วัน</strong></p>
+        <p><strong>คุณจะสามารถกลับมาใช้งานระบบได้อีกครั้งในวันที่:</strong> ${suspendedUntil}</p>
+        <p>ขออภัยในความไม่สะดวก หากมีข้อสงสัยกรุณาติดต่อสโมสรนักศึกษาฯ</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
+        <p style="font-size: 12px; color: #7f8c8d; text-align: center;">
+          สโมสรนักศึกษาคณะครุศาสตร์อุตสาหกรรม<br/>มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ<br/>
+          (อีเมลนี้เป็นการแจ้งเตือนอัตโนมัติ กรุณาอย่าตอบกลับ)
+        </p>
+      </div>
+    `;
+    this._send(borrowerEmail, subject, htmlBody);
+  },
+
+  sendSuspensionOverdue(borrowerEmail, borrowerName, items) {
+    const subject = `🚨 แจ้งระงับสิทธิ์การจองและยืมอุปกรณ์ (เกินกำหนดคืน)`;
+    const itemsListHtml = items.map((item, index) => `<li>${index + 1}. ${item}</li>`).join('');
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img src="cid:logoImage" alt="SMO FTE Logo" style="max-width: 150px; height: auto;" />
+        </div>
+        <h2 style="color: #c0392b; text-align: center;">แจ้งระงับสิทธิ์การใช้งานระบบ</h2>
+        <p>เรียน คุณ <strong>${borrowerName}</strong>,</p>
+        <p>เนื่องจากคุณมีรายการอุปกรณ์ค้างส่งคืนเกินกำหนด ระบบจึงได้ทำการ <strong>ระงับสิทธิ์การจองและยืมอุปกรณ์ของคุณโดยไม่มีกำหนด</strong> จนกว่าคุณจะนำอุปกรณ์ต่อไปนี้มาส่งคืนครบถ้วน:</p>
+        <ul>${itemsListHtml}</ul>
+        <p>กรุณานำอุปกรณ์มาคืนโดยเร็วที่สุด เพื่อหลีกเลี่ยงค่าปรับสะสม (20 บาท/ชิ้น/วันทำการ) และเพื่อรับสิทธิ์การใช้งานคืน</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
+        <p style="font-size: 12px; color: #7f8c8d; text-align: center;">
+          สโมสรนักศึกษาคณะครุศาสตร์อุตสาหกรรม<br/>มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ<br/>
+          (อีเมลนี้เป็นการแจ้งเตือนอัตโนมัติ กรุณาอย่าตอบกลับ)
+        </p>
+      </div>
+    `;
+    this._send(borrowerEmail, subject, htmlBody);
+  },
+
+  sendSuspensionManual(borrowerEmail, borrowerName, reason, suspendedUntil) {
+    const subject = `⛔ แจ้งระงับสิทธิ์การจองและยืมอุปกรณ์`;
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img src="cid:logoImage" alt="SMO FTE Logo" style="max-width: 150px; height: auto;" />
+        </div>
+        <h2 style="color: #c0392b; text-align: center;">แจ้งระงับสิทธิ์การใช้งานระบบ</h2>
+        <p>เรียน คุณ <strong>${borrowerName}</strong>,</p>
+        <p>ระบบได้ทำการ <strong>ระงับสิทธิ์การจองและยืมอุปกรณ์ของคุณ</strong> โดยมีรายละเอียดดังนี้:</p>
+        <p><strong>เหตุผล:</strong> ${reason}</p>
+        <p><strong>วันสิ้นสุดการระงับสิทธิ์:</strong> ${suspendedUntil}</p>
+        <p>หากมีข้อสงสัยกรุณาติดต่อสโมสรนักศึกษาฯ</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
+        <p style="font-size: 12px; color: #7f8c8d; text-align: center;">
+          สโมสรนักศึกษาคณะครุศาสตร์อุตสาหกรรม<br/>มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ<br/>
+          (อีเมลนี้เป็นการแจ้งเตือนอัตโนมัติ กรุณาอย่าตอบกลับ)
+        </p>
+      </div>
+    `;
+    this._send(borrowerEmail, subject, htmlBody);
   }
 };

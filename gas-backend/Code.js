@@ -38,6 +38,9 @@ function doGet(e) {
       result = all.find(tx => tx.id === id);
       if (!result) throw new Error('Transaction not found');
     }
+    else if (path === '/borrowers') {
+      result = Borrower.getAll();
+    }
     else if (path.startsWith('/reservations/borrower/search')) {
       try {
         result = Borrower.search({
@@ -139,6 +142,14 @@ function doPost(e) {
       const id = path.split('/')[2];
       result = Reservation.delete(id);
     }
+    else if (path.match(/^\/borrowers\/(.+)\/suspend$/) && method === 'POST') {
+      const id = path.split('/')[2];
+      result = Borrower.suspend(id, body.reason, body.suspendedUntil);
+    }
+    else if (path.match(/^\/borrowers\/(.+)\/unsuspend$/) && method === 'POST') {
+      const id = path.split('/')[2];
+      result = Borrower.unsuspend(id);
+    }
     else {
       return jsonResponse({ error: 'Route not found' }, 404);
     }
@@ -160,4 +171,85 @@ function jsonResponse(data, statusCode = 200) {
   };
   return ContentService.createTextOutput(JSON.stringify(payload))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * Cron function to check for due dates (Triggered once a day by GAS trigger)
+ */
+function checkDueDates() {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+
+  // 1. Clear expired suspensions
+  const borrowers = Database.getAll('Borrowers');
+  const expiredSuspensions = borrowers.filter(b => 
+    b.isSuspended && b.suspendedUntil && new Date(b.suspendedUntil) < now
+  );
+
+  for (const b of expiredSuspensions) {
+    Database.update('Borrowers', b.id, {
+      isSuspended: false,
+      suspendedUntil: '',
+      suspensionType: '',
+      suspensionReason: ''
+    });
+  }
+
+  // 2. Check Missed Pickups
+  const reservations = Database.getAll('Reservations');
+  const missedPickups = reservations.filter(r => 
+    r.status === 'APPROVED' && new Date(r.borrowDate).toISOString() < todayStart
+  );
+
+  for (const r of missedPickups) {
+    Database.update('Reservations', r.id, { status: 'REJECTED' });
+    const items = Database.find('ReservationItems', 'reservationId', r.id);
+    for (const item of items) {
+      Database.update('Equipments', item.equipmentId, { status: 'AVAILABLE' });
+    }
+
+    const suspendDate = new Date(now);
+    suspendDate.setDate(suspendDate.getDate() + 3);
+    
+    Database.update('Borrowers', r.borrowerId, {
+      isSuspended: true,
+      suspensionType: 'MISSED_PICKUP',
+      suspendedUntil: suspendDate.toISOString(),
+      suspensionReason: 'ไม่มารับอุปกรณ์ตามกำหนดจอง'
+    });
+
+    const b = Database.getById('Borrowers', r.borrowerId);
+    if (b) {
+      Email.sendSuspensionMissedPickup(b.email, b.name, suspendDate.toLocaleDateString('th-TH'));
+    }
+  }
+
+  // 3. Check Overdue
+  const borrows = Database.getAll('BorrowTransactions');
+  const overdueTransactions = borrows.filter(tx => 
+    !tx.returnedDate && new Date(tx.dueDate).toISOString() < todayStart
+  );
+
+  for (const tx of overdueTransactions) {
+    const b = Database.getById('Borrowers', tx.borrowerId);
+    if (b && (!b.isSuspended || b.suspensionType !== 'OVERDUE')) {
+      Database.update('Borrowers', tx.borrowerId, {
+        isSuspended: true,
+        suspensionType: 'OVERDUE',
+        suspendedUntil: '',
+        suspensionReason: 'มียอดค้างส่งคืนอุปกรณ์'
+      });
+
+      const txItems = Database.find('BorrowItems', 'transactionId', tx.id);
+      const equipmentNames = [];
+      for (const tItem of txItems) {
+        if (!tItem.returnedAt) {
+          const eq = Database.getById('Equipments', tItem.equipmentId);
+          if (eq) equipmentNames.push(eq.name);
+        }
+      }
+
+      Email.sendSuspensionOverdue(b.email, b.name, equipmentNames);
+    }
+  }
 }

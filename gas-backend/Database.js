@@ -15,7 +15,7 @@ const Database = {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     const schema = {
       'Admins': ['id', 'email', 'password', 'name', 'createdAt', 'updatedAt'],
-      'Borrowers': ['id', 'studentId', 'name', 'email', 'yearLevel', 'department', 'faculty', 'phoneNumber', 'createdAt', 'updatedAt'],
+      'Borrowers': ['id', 'studentId', 'name', 'email', 'yearLevel', 'department', 'faculty', 'phoneNumber', 'isSuspended', 'suspensionType', 'suspensionReason', 'suspendedUntil', 'createdAt', 'updatedAt'],
       'Equipments': ['id', 'name', 'serialNumber', 'imageUrl', 'status', 'createdAt', 'updatedAt'],
       'Reservations': ['id', 'borrowerId', 'borrowDate', 'returnDate', 'status', 'createdAt', 'updatedAt'],
       'ReservationItems': ['id', 'reservationId', 'equipmentId'],
