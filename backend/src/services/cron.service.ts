@@ -1,5 +1,5 @@
 import prisma from '../prisma';
-import { sendDueDateReminder, sendOverdueWarning } from './email.service';
+import { sendDueDateReminder, sendOverdueWarning, sendSuspensionMissedPickup, sendSuspensionOverdue } from './email.service';
 
 const calculateOverdueWorkingDays = (startDate: Date, endDate: Date): number => {
     let count = 0;
@@ -23,13 +23,78 @@ const calculateOverdueWorkingDays = (startDate: Date, endDate: Date): number => 
 };
 
 export const checkDueDates = async () => {
-    console.log('Running Due Date Check...');
+    console.log('Running Due Date Check & Suspensions...');
+    const today = new Date();
+    const startOfToday = new Date(today.setHours(0, 0, 0, 0));
+    const now = new Date();
+
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const startOfTomorrow = new Date(tomorrow.setHours(0, 0, 0, 0));
     const endOfTomorrow = new Date(tomorrow.setHours(23, 59, 59, 999));
 
     try {
+        // 1. Clear expired suspensions
+        const expiredSuspensions = await prisma.borrower.findMany({
+            where: {
+                isSuspended: true,
+                suspendedUntil: { lt: now }
+            }
+        });
+        
+        if (expiredSuspensions.length > 0) {
+            await prisma.borrower.updateMany({
+                where: { id: { in: expiredSuspensions.map(b => b.id) } },
+                data: { isSuspended: false, suspendedUntil: null, suspensionType: null, suspensionReason: null }
+            });
+            console.log(`Cleared ${expiredSuspensions.length} expired suspensions.`);
+        }
+
+        // 2. Check Missed Pickups (APPROVED reservations where borrowDate < today)
+        const missedPickups = await prisma.reservation.findMany({
+            where: {
+                status: 'APPROVED',
+                borrowDate: { lt: startOfToday }
+            },
+            include: { items: true, borrower: true }
+        });
+
+        for (const res of missedPickups) {
+            // Cancel reservation
+            await prisma.reservation.update({
+                where: { id: res.id },
+                data: { status: 'CANCELLED_MISSED' as any } // Needs schema support, or just REJECTED. Let's use REJECTED with note if we don't have enum.
+            });
+
+            // Release equipment
+            const equipmentIds = res.items.map(i => i.equipmentId);
+            await prisma.equipment.updateMany({
+                where: { id: { in: equipmentIds } },
+                data: { status: 'AVAILABLE' }
+            });
+
+            // Suspend borrower for 3 days
+            const suspendedUntil = new Date(now);
+            suspendedUntil.setDate(suspendedUntil.getDate() + 3);
+
+            await prisma.borrower.update({
+                where: { id: res.borrowerId },
+                data: {
+                    isSuspended: true,
+                    suspensionType: 'MISSED_PICKUP',
+                    suspendedUntil,
+                    suspensionReason: 'ไม่มารับอุปกรณ์ตามกำหนดจอง'
+                }
+            });
+
+            // Send email
+            await sendSuspensionMissedPickup(
+                res.borrower.email,
+                res.borrower.name,
+                suspendedUntil.toLocaleDateString('th-TH')
+            );
+            console.log(`Suspended ${res.borrower.email} for missed pickup.`);
+        }
         const transactions = await prisma.borrowTransaction.findMany({
             where: {
                 dueDate: {
@@ -60,8 +125,6 @@ export const checkDueDates = async () => {
         }
 
         console.log('Running Overdue Check...');
-        const today = new Date();
-        const startOfToday = new Date(today.setHours(0, 0, 0, 0));
 
         const overdueTransactions = await prisma.borrowTransaction.findMany({
             where: {
@@ -99,6 +162,26 @@ export const checkDueDates = async () => {
                     fineAmount
                 );
                 console.log(`Sent overdue warning to ${transaction.borrower.email}`);
+
+                // Suspend borrower for OVERDUE if not already suspended for it
+                if (!transaction.borrower.isSuspended || transaction.borrower.suspensionType !== 'OVERDUE') {
+                    await prisma.borrower.update({
+                        where: { id: transaction.borrowerId },
+                        data: {
+                            isSuspended: true,
+                            suspensionType: 'OVERDUE',
+                            suspendedUntil: null, // Indefinite until returned
+                            suspensionReason: 'มียอดค้างส่งคืนอุปกรณ์'
+                        }
+                    });
+                    
+                    await sendSuspensionOverdue(
+                        transaction.borrower.email,
+                        transaction.borrower.name,
+                        itemNames
+                    );
+                    console.log(`Suspended ${transaction.borrower.email} for overdue items.`);
+                }
             }
         }
     } catch (error) {

@@ -12,6 +12,9 @@ interface Reservation {
     department?: string;
     faculty?: string;
     phoneNumber?: string;
+    isSuspended?: boolean;
+    suspensionReason?: string;
+    suspendedUntil?: string;
     borrowDate: string;
     returnDate: string;
     status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
@@ -254,7 +257,14 @@ export default function AdminReservations() {
                                                 />
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="font-bold text-gray-800">{res.borrowerName}</div>
+                                                <div className="font-bold text-gray-800 flex items-center gap-2">
+                                                    {res.borrowerName}
+                                                    {res.isSuspended && (
+                                                        <span className="bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold animate-pulse" title={`เหตุผล: ${res.suspensionReason || 'ไม่ระบุ'}`}>
+                                                            ถูกระงับสิทธิ์
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <div className="text-sm text-gray-500">{res.borrowerEmail}</div>
                                                 <div className="text-xs text-gray-400 mt-1 whitespace-nowrap">
                                                     ปี {res.yearLevel || '-'} | {res.department || '-'} | {res.faculty || '-'}<br/>
@@ -295,9 +305,15 @@ export default function AdminReservations() {
                                                         ) : (
                                                             <>
                                                                 <button
-                                                                    onClick={() => handleUpdateStatus(res.id, 'APPROVED')}
-                                                                    className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
-                                                                    title="อนุมัติ"
+                                                                    onClick={() => {
+                                                                        if (res.isSuspended) {
+                                                                            Swal.fire('ไม่สามารถอนุมัติได้', 'ผู้ใช้นี้ถูกระงับสิทธิ์การใช้งานอยู่', 'error');
+                                                                            return;
+                                                                        }
+                                                                        handleUpdateStatus(res.id, 'APPROVED')
+                                                                    }}
+                                                                    className={`p-2 rounded-lg transition-colors ${res.isSuspended ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-green-100 text-green-600 hover:bg-green-200'}`}
+                                                                    title={res.isSuspended ? 'ไม่สามารถอนุมัติได้ (ถูกระงับสิทธิ์)' : 'อนุมัติ'}
                                                                 >
                                                                     <Check size={18} />
                                                                 </button>

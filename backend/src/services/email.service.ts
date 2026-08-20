@@ -250,3 +250,46 @@ export const sendAdminNewReservationNotification = async (borrowerName: string, 
     `;
     await sendEmail(adminEmail, subject, html);
 };
+
+export const sendSuspensionMissedPickup = async (to: string, name: string, suspendedUntil: string) => {
+    const subject = 'แจ้งเตือนการระงับสิทธิ์การจองและการยืมอุปกรณ์';
+    const html = `
+        <h1>เรียน ${name},</h1>
+        <p>ท่านถูกระงับสิทธิ์การจองและการยืมอุปกรณ์เป็นเวลา 3 วัน เนื่องจากไม่มารับอุปกรณ์ตามกำหนดจอง</p>
+        <p>โดยระบบจะปลดการระงับสิทธิ์อัตโนมัติในวันที่ <strong>${suspendedUntil}</strong></p>
+        <br>
+        <p>ขอบคุณครับ</p>
+    `;
+    await sendEmail(to, subject, html);
+};
+
+export const sendSuspensionOverdue = async (to: string, name: string, items: string[]) => {
+    const subject = 'แจ้งเตือนอุปกรณ์เกินกำหนดคืน และระงับสิทธิ์การใช้งาน';
+    const formattedItems = groupItemsForEmail(items);
+    const list = formattedItems.map(item => `<li>${item}</li>`).join('');
+
+    const html = `
+        <h1>เรียน ${name},</h1>
+        <p>เนื่องจากท่านเกินกำหนดส่งคืนอุปกรณ์ ดังต่อไปนี้:</p>
+        <ul>${list}</ul>
+        <p>ระบบจึงได้ทำการ <strong style="color: red;">ระงับสิทธิ์การจองและการยืม</strong></p>
+        <p>กรุณานำอุปกรณ์มาคืนที่เคาน์เตอร์เพื่อปลดการระงับสิทธิ์</p>
+        <br>
+        <p>ขอบคุณครับ</p>
+    `;
+    await sendEmail(to, subject, html);
+};
+
+export const sendSuspensionManual = async (to: string, name: string, reason: string, suspendedUntilStr: string) => {
+    const subject = 'แจ้งเตือนการระงับสิทธิ์การจองและการยืมอุปกรณ์โดยผู้ดูแลระบบ';
+    const html = `
+        <h1>เรียน ${name},</h1>
+        <p>บัญชีของท่านถูก <strong style="color: red;">ระงับสิทธิ์การจองและการยืมอุปกรณ์</strong></p>
+        <p><strong>สาเหตุ:</strong> ${reason}</p>
+        <p><strong>กำหนดเวลาปลดระงับ:</strong> ${suspendedUntilStr}</p>
+        <p>หากมีข้อสงสัยกรุณาติดต่อผู้ดูแลระบบ</p>
+        <br>
+        <p>ขอบคุณครับ</p>
+    `;
+    await sendEmail(to, subject, html);
+};

@@ -197,15 +197,30 @@ export default function AdminBorrowReturn() {
                     faculty: res.data.faculty || prev.faculty,
                     phoneNumber: res.data.phoneNumber || prev.phoneNumber,
                 }));
-                Swal.fire({
-                    icon: 'success',
-                    title: 'เชื่อมโยงต้อมูลสำเร็จ',
-                    text: 'ดึงข้อมูลประวัติผู้ยืมของคุณเรียบร้อยแล้ว',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000
-                });
+
+                if (res.data.isSuspended) {
+                    let untilText = res.data.suspendedUntil ? new Date(res.data.suspendedUntil).toLocaleDateString('th-TH') : 'ไม่มีกำหนด';
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'แจ้งเตือน: ผู้ใช้นี้ถูกระงับสิทธิ์',
+                        html: `
+                            <p class="text-red-600 font-bold mb-2">บัญชีนี้อยู่ระหว่างถูกระงับสิทธิ์การจอง/ยืม</p>
+                            <p><strong>สาเหตุ:</strong> ${res.data.suspensionReason || 'ไม่ระบุ'}</p>
+                            <p><strong>ปลดระงับวันที่:</strong> ${untilText}</p>
+                        `,
+                        confirmButtonColor: '#f97316'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'เชื่อมโยงข้อมูลสำเร็จ',
+                        text: 'ดึงข้อมูลประวัติผู้ยืมของคุณเรียบร้อยแล้ว',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
             }
         } catch (error: any) {
             if (error.response?.status !== 404) {

@@ -18,6 +18,7 @@ export default function CartPage() {
     const [items, setItems] = useState<Equipment[]>([]);
     const [loading, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [isSuspended, setIsSuspended] = useState(false);
     const [showTermsModal, setShowTermsModal] = useState(false);
     const [formData, setFormData] = useState({
         borrowerName: '',
@@ -147,21 +148,40 @@ export default function CartPage() {
                     faculty: res.data.faculty || prev.faculty,
                     phoneNumber: res.data.phoneNumber || prev.phoneNumber,
                 }));
-                Swal.fire({
-                    icon: 'success',
-                    title: 'เชื่อมโยงข้อมูลสำเร็จ',
-                    text: 'ดึงข้อมูลประวัติผู้ยืมของคุณเรียบร้อยแล้ว',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000
-                });
+
+                if (res.data.isSuspended) {
+                    setIsSuspended(true);
+                    let untilText = res.data.suspendedUntil ? new Date(res.data.suspendedUntil).toLocaleDateString('th-TH') : 'ไม่มีกำหนด';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'ระงับสิทธิ์การใช้งาน',
+                        html: `
+                            <p class="text-red-600 font-bold mb-2">ท่านถูกระงับสิทธิ์การจองและการยืม</p>
+                            <p><strong>สาเหตุ:</strong> ${res.data.suspensionReason || 'ไม่ระบุ'}</p>
+                            <p><strong>ปลดระงับวันที่:</strong> ${untilText}</p>
+                            <p class="text-sm mt-4 text-gray-500">กรุณาติดต่อผู้ดูแลระบบหากมีข้อสงสัย</p>
+                        `,
+                        confirmButtonColor: '#d33'
+                    });
+                } else {
+                    setIsSuspended(false);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'เชื่อมโยงข้อมูลสำเร็จ',
+                        text: 'ดึงข้อมูลประวัติผู้ยืมของคุณเรียบร้อยแล้ว',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
             }
         } catch (error: any) {
             // Ignore 404s, it just means they are a new borrower
             if (error.response?.status !== 404) {
                 console.error('Failed to fetch borrower info:', error);
             }
+            setIsSuspended(false);
         }
     };
 
@@ -176,6 +196,10 @@ export default function CartPage() {
 
         if (diffDays > 3) {
             return Swal.fire('แจ้งเตือน', 'ยืมได้สูงสุดไม่เกิน 3 วัน', 'warning');
+        }
+
+        if (isSuspended) {
+            return Swal.fire('ไม่สามารถจองได้', 'บัญชีของท่านอยู่ระหว่างถูกระงับสิทธิ์', 'error');
         }
 
         setShowTermsModal(true); // Open Modal instead of submitting directly
@@ -212,9 +236,15 @@ export default function CartPage() {
                 borrowDate: '',
                 returnDate: '',
             });
+            setIsSuspended(false);
             navigate('/');
         } catch (error: any) {
             const errorMessage = error.response?.data?.message || error.response?.data?.error || 'ไม่สามารถทำรายการได้ในขณะนี้';
+            
+            if (error.response?.data?.isSuspended) {
+                setIsSuspended(true);
+            }
+
             Swal.fire({
                 icon: 'error',
                 title: 'เกิดข้อผิดพลาด',
@@ -385,11 +415,12 @@ export default function CartPage() {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">ยืมวันที่</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">ยืมวันที่ <span className="text-red-500 text-xs">(ล่วงหน้าไม่เกิน 7 วัน)</span></label>
                                     <input
                                         type="date"
                                         required
                                         min={new Date().toISOString().split('T')[0]} // Min today
+                                        max={new Date(new Date().setDate(new Date().getDate() + 7)).toISOString().split('T')[0]} // Max 7 days
                                         className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/50 outline-none"
                                         value={formData.borrowDate}
                                         onChange={e => {
@@ -427,11 +458,11 @@ export default function CartPage() {
                             <button
                                 type="submit"
                                 className={`w-full font-bold py-3 rounded-xl shadow-lg mt-4 transition-all
-                                    ${submitting ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-primary hover:bg-secondary text-white shadow-primary/30'}
+                                    ${submitting || isSuspended || items.length === 0 ? 'bg-gray-400 cursor-not-allowed shadow-none' : 'bg-primary hover:bg-secondary text-white shadow-primary/30'}
                                 `}
-                                disabled={items.length === 0 || submitting}
+                                disabled={items.length === 0 || submitting || isSuspended}
                             >
-                                {submitting ? '⏳ กำลังบันทึก...' : 'ยืนยันการจอง'}
+                                {submitting ? '⏳ กำลังบันทึก...' : isSuspended ? '🚫 ถูกระงับสิทธิ์' : 'ยืนยันการจอง'}
                             </button>
                             <p className="text-xs text-center text-gray-400 mt-2">
                                 * กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนยืนยัน

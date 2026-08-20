@@ -19,6 +19,34 @@ export const createReservation = async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'No equipment selected' });
         }
 
+        // Validate 7-day rule
+        const borrowDateObj = new Date(borrowDate);
+        borrowDateObj.setHours(0, 0, 0, 0);
+        const todayObj = getStartOfTodayLocal();
+        const maxDate = new Date(todayObj);
+        maxDate.setDate(maxDate.getDate() + 7);
+
+        if (borrowDateObj > maxDate) {
+            return res.status(400).json({ error: 'สามารถทำการจองอุปกรณ์ล่วงหน้าได้ไม่เกิน 7 วัน' });
+        }
+
+        // Find existing Borrower to check suspension
+        const existingBorrower = await prisma.borrower.findUnique({
+            where: { studentId: studentId || borrowerEmail }
+        });
+
+        if (existingBorrower && existingBorrower.isSuspended) {
+            const now = new Date();
+            if (!existingBorrower.suspendedUntil || existingBorrower.suspendedUntil > now) {
+                return res.status(400).json({
+                    error: 'ท่านถูกระงับสิทธิ์การจองและการยืม',
+                    isSuspended: true,
+                    suspensionReason: existingBorrower.suspensionReason,
+                    suspendedUntil: existingBorrower.suspendedUntil
+                });
+            }
+        }
+
         // Check for overdue items (Active items that are overdue)
         const overdueCount = await prisma.borrowItem.count({
             where: {
@@ -114,7 +142,11 @@ export const searchBorrowerInfo = async (req: Request, res: Response) => {
                 department: true,
                 faculty: true,
                 phoneNumber: true,
-                createdAt: true
+                createdAt: true,
+                isSuspended: true,
+                suspensionType: true,
+                suspendedUntil: true,
+                suspensionReason: true
             }
         });
 
@@ -130,7 +162,11 @@ export const searchBorrowerInfo = async (req: Request, res: Response) => {
             department: borrower.department,
             faculty: borrower.faculty,
             phoneNumber: borrower.phoneNumber,
-            createdAt: borrower.createdAt
+            createdAt: borrower.createdAt,
+            isSuspended: borrower.isSuspended,
+            suspensionType: borrower.suspensionType,
+            suspendedUntil: borrower.suspendedUntil,
+            suspensionReason: borrower.suspensionReason
         };
 
         res.json(result);
@@ -156,6 +192,9 @@ export const getReservations = async (req: Request, res: Response) => {
             department: r.borrower?.department,
             faculty: r.borrower?.faculty,
             phoneNumber: r.borrower?.phoneNumber,
+            isSuspended: r.borrower?.isSuspended,
+            suspensionReason: r.borrower?.suspensionReason,
+            suspendedUntil: r.borrower?.suspendedUntil,
         }));
         res.json(formatted);
     } catch (error) {

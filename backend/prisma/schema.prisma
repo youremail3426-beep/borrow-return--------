@@ -33,6 +33,10 @@ model Borrower {
   department    String?
   faculty       String?
   phoneNumber   String?
+  isSuspended   Boolean  @default(false)
+  suspensionType String?  // MISSED_PICKUP, OVERDUE, MANUAL
+  suspendedUntil DateTime?
+  suspensionReason String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

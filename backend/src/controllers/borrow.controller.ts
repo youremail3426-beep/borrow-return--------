@@ -28,6 +28,22 @@ export const borrowItems = async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'ยืมได้สูงสุดไม่เกิน 3 วัน' });
         }
 
+        // Find existing Borrower to check suspension
+        const existingBorrower = await prisma.borrower.findUnique({
+            where: { studentId: studentId || borrowerEmail }
+        });
+
+        if (existingBorrower && existingBorrower.isSuspended) {
+            const now = new Date();
+            if (!existingBorrower.suspendedUntil || existingBorrower.suspendedUntil > now) {
+                return res.status(400).json({ 
+                    error: `ผู้ใช้นี้ถูกระงับสิทธิ์: ${existingBorrower.suspensionReason || ''}`,
+                    isSuspended: true,
+                    suspendedUntil: existingBorrower.suspendedUntil
+                });
+            }
+        }
+
         // Check for Overdue Items
         // Find any active transaction for this user that is overdue
         const overdueTransactions = await prisma.borrowTransaction.findFirst({
@@ -198,10 +214,35 @@ export const returnItems = async (req: Request, res: Response) => {
             returnMap.get(email)!.items.push(itemName);
         }
 
-        // Send email to each borrower
+        // Send email to each borrower and check auto un-suspend for OVERDUE
         for (const [email, data] of returnMap.entries()) {
             await sendReturnReceipt(email, data.name, data.items);
-            console.log(`Return receipt sent to ${ email } `);
+            console.log(`Return receipt sent to ${email}`);
+
+            // Auto un-suspend if they were suspended for OVERDUE and have no remaining overdue items
+            const borrower = await prisma.borrower.findFirst({ where: { email } });
+            if (borrower && borrower.isSuspended && borrower.suspensionType === 'OVERDUE') {
+                const remainingOverdue = await prisma.borrowTransaction.count({
+                    where: {
+                        borrowerId: borrower.id,
+                        returnedDate: null,
+                        dueDate: { lt: getStartOfTodayLocal() }
+                    }
+                });
+                
+                if (remainingOverdue === 0) {
+                    await prisma.borrower.update({
+                        where: { id: borrower.id },
+                        data: {
+                            isSuspended: false,
+                            suspensionType: null,
+                            suspendedUntil: null,
+                            suspensionReason: null
+                        }
+                    });
+                    console.log(`Auto un-suspended ${email} (All overdue items returned)`);
+                }
+            }
         }
 
         res.json({ message: 'Returned successfully', returnedCount: activeBorrowItems.length });
