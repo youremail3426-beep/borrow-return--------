@@ -331,6 +331,7 @@ const Borrow = {
                         suspensionReason: '',
                         suspendedUntil: ''
                     });
+                    Email.sendUnsuspend(borrower.email, borrower.name, false);
                 }
             }
         }

@@ -193,6 +193,7 @@ function checkDueDates() {
       suspensionType: '',
       suspensionReason: ''
     });
+    Email.sendUnsuspend(b.email, b.name, false);
   }
 
   // 2. Check Missed Pickups

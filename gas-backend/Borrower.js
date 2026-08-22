@@ -27,6 +27,18 @@ const Borrower = {
       throw new Error('Borrower not found');
     }
 
+    let isSuspended = borrower.isSuspended === true || borrower.isSuspended === 'TRUE' || borrower.isSuspended === 'true';
+    let suspendedUntil = borrower.suspendedUntil;
+    let suspensionType = borrower.suspensionType;
+    let suspensionReason = borrower.suspensionReason;
+    
+    if (isSuspended && suspendedUntil && new Date(suspendedUntil) < new Date()) {
+      isSuspended = false;
+      suspendedUntil = '';
+      suspensionType = '';
+      suspensionReason = '';
+    }
+
     return {
       id: borrower.id,
       borrowerName: borrower.name,
@@ -36,10 +48,10 @@ const Borrower = {
       department: borrower.department,
       faculty: borrower.faculty,
       phoneNumber: borrower.phoneNumber,
-      isSuspended: borrower.isSuspended === true || borrower.isSuspended === 'TRUE' || borrower.isSuspended === 'true',
-      suspensionType: borrower.suspensionType,
-      suspensionReason: borrower.suspensionReason,
-      suspendedUntil: borrower.suspendedUntil
+      isSuspended,
+      suspensionType,
+      suspensionReason,
+      suspendedUntil
     };
   },
 
@@ -48,20 +60,35 @@ const Borrower = {
    */
   getAll() {
     const borrowers = Database.getAll(this.SHEET_NAME);
-    return borrowers.map(b => ({
-      id: b.id,
-      name: b.name,
-      email: b.email,
-      studentId: b.studentId,
-      yearLevel: b.yearLevel,
-      department: b.department,
-      faculty: b.faculty,
-      phoneNumber: b.phoneNumber,
-      isSuspended: b.isSuspended === true || b.isSuspended === 'TRUE' || b.isSuspended === 'true',
-      suspensionType: b.suspensionType,
-      suspensionReason: b.suspensionReason,
-      suspendedUntil: b.suspendedUntil
-    }));
+    const now = new Date();
+    return borrowers.map(b => {
+      let isSuspended = b.isSuspended === true || b.isSuspended === 'TRUE' || b.isSuspended === 'true';
+      let suspendedUntil = b.suspendedUntil;
+      let suspensionType = b.suspensionType;
+      let suspensionReason = b.suspensionReason;
+      
+      if (isSuspended && suspendedUntil && new Date(suspendedUntil) < now) {
+        isSuspended = false;
+        suspendedUntil = '';
+        suspensionType = '';
+        suspensionReason = '';
+      }
+
+      return {
+        id: b.id,
+        name: b.name,
+        email: b.email,
+        studentId: b.studentId,
+        yearLevel: b.yearLevel,
+        department: b.department,
+        faculty: b.faculty,
+        phoneNumber: b.phoneNumber,
+        isSuspended,
+        suspensionType,
+        suspensionReason,
+        suspendedUntil
+      };
+    });
   },
 
   /**
@@ -101,6 +128,8 @@ const Borrower = {
       suspendedUntil: ''
     };
 
-    return Database.update(this.SHEET_NAME, id, updateData);
+    const updated = Database.update(this.SHEET_NAME, id, updateData);
+    Email.sendUnsuspend(borrower.email, borrower.name, true);
+    return updated;
   }
 };

@@ -93,7 +93,7 @@ export default function AdminBorrowers() {
                 Swal.fire('สำเร็จ', 'ระงับสิทธิ์ผู้ใช้งานเรียบร้อยแล้ว', 'success');
                 fetchBorrowers();
             } catch (error: any) {
-                Swal.fire('ผิดพลาด', error.response?.data?.error || 'ไม่สามารถทำรายการได้', 'error');
+                Swal.fire('ผิดพลาด', error.response?.data?.message || error.response?.data?.error || 'ไม่สามารถทำรายการได้', 'error');
             }
         }
     };
@@ -115,7 +115,7 @@ export default function AdminBorrowers() {
                 Swal.fire('สำเร็จ', 'ปลดระงับสิทธิ์เรียบร้อยแล้ว', 'success');
                 fetchBorrowers();
             } catch (error: any) {
-                Swal.fire('ผิดพลาด', error.response?.data?.error || 'ไม่สามารถทำรายการได้', 'error');
+                Swal.fire('ผิดพลาด', error.response?.data?.message || error.response?.data?.error || 'ไม่สามารถทำรายการได้', 'error');
             }
         }
     };

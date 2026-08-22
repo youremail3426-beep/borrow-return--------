@@ -294,5 +294,27 @@ const Email = {
       </div>
     `;
     this._send(borrowerEmail, subject, htmlBody);
+  },
+
+  sendUnsuspend(borrowerEmail, borrowerName, isManual) {
+    const subject = `✅ แจ้งปลดระงับสิทธิ์การจองและยืมอุปกรณ์`;
+    const reasonText = isManual ? 'ผู้ดูแลระบบได้ทำการปลดระงับสิทธิ์ให้คุณแล้ว' : 'ระบบได้ทำการปลดระงับสิทธิ์ให้คุณโดยอัตโนมัติเนื่องจากครบกำหนดเวลา หรือคุณได้จัดการคืนอุปกรณ์ที่ค้างส่งเรียบร้อยแล้ว';
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img src="cid:logoImage" alt="SMO FTE Logo" style="max-width: 150px; height: auto;" />
+        </div>
+        <h2 style="color: #27ae60; text-align: center;">แจ้งปลดระงับสิทธิ์การใช้งาน</h2>
+        <p>เรียน คุณ <strong>${borrowerName}</strong>,</p>
+        <p>${reasonText}</p>
+        <p>ขณะนี้คุณสามารถเข้าใช้งานระบบเพื่อทำการจองและยืมอุปกรณ์ได้ตามปกติ</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
+        <p style="font-size: 12px; color: #7f8c8d; text-align: center;">
+          สโมสรนักศึกษาคณะครุศาสตร์อุตสาหกรรม<br/>มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ<br/>
+          (อีเมลนี้เป็นการแจ้งเตือนอัตโนมัติ กรุณาอย่าตอบกลับ)
+        </p>
+      </div>
+    `;
+    this._send(borrowerEmail, subject, htmlBody);
   }
 };
