@@ -182,9 +182,11 @@ function checkDueDates() {
 
   // 1. Clear expired suspensions
   const borrowers = Database.getAll('Borrowers');
-  const expiredSuspensions = borrowers.filter(b => 
-    b.isSuspended && b.suspendedUntil && new Date(b.suspendedUntil) < now
-  );
+  const expiredSuspensions = borrowers.filter(b => {
+    if (!b.isSuspended || !b.suspendedUntil) return false;
+    let untilDate = b.suspendedUntil.length === 10 ? new Date(b.suspendedUntil + 'T23:59:59+07:00') : new Date(b.suspendedUntil);
+    return untilDate < now;
+  });
 
   for (const b of expiredSuspensions) {
     Database.update('Borrowers', b.id, {

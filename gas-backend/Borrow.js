@@ -19,7 +19,11 @@ const Borrow = {
     
     if (borrower.isSuspended === true || borrower.isSuspended === 'TRUE' || borrower.isSuspended === 'true') {
       const now = new Date();
-      if (!borrower.suspendedUntil || new Date(borrower.suspendedUntil) > now) {
+      if (!borrower.suspendedUntil) {
+        return true;
+      }
+      let untilDate = borrower.suspendedUntil.length === 10 ? new Date(borrower.suspendedUntil + 'T23:59:59+07:00') : new Date(borrower.suspendedUntil);
+      if (untilDate > now) {
         return true;
       }
     }
