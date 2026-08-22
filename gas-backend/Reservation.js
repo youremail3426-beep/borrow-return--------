@@ -95,7 +95,7 @@ const Reservation = {
       if (!borrower.suspendedUntil) {
         throw new Error('ไม่สามารถทำรายการได้ เนื่องจากบัญชีนี้ถูกระงับสิทธิ์');
       }
-      let untilDate = borrower.suspendedUntil.length === 10 ? new Date(borrower.suspendedUntil + 'T23:59:59+07:00') : new Date(borrower.suspendedUntil);
+      let untilDate = borrower.suspendedUntil.length === 10 ? new Date(borrower.suspendedUntil + 'T00:00:00+07:00') : new Date(borrower.suspendedUntil);
       if (untilDate > todayObj) {
         throw new Error(`ไม่สามารถทำรายการได้ เนื่องจากบัญชีนี้ถูกระงับสิทธิ์จนถึงวันที่ ${new Date(borrower.suspendedUntil).toLocaleDateString('th-TH')}`);
       }

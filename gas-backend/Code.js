@@ -184,7 +184,7 @@ function checkDueDates() {
   const borrowers = Database.getAll('Borrowers');
   const expiredSuspensions = borrowers.filter(b => {
     if (!b.isSuspended || !b.suspendedUntil) return false;
-    let untilDate = b.suspendedUntil.length === 10 ? new Date(b.suspendedUntil + 'T23:59:59+07:00') : new Date(b.suspendedUntil);
+    let untilDate = b.suspendedUntil.length === 10 ? new Date(b.suspendedUntil + 'T00:00:00+07:00') : new Date(b.suspendedUntil);
     return untilDate < now;
   });
 

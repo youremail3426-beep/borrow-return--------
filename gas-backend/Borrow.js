@@ -22,7 +22,7 @@ const Borrow = {
       if (!borrower.suspendedUntil) {
         return true;
       }
-      let untilDate = borrower.suspendedUntil.length === 10 ? new Date(borrower.suspendedUntil + 'T23:59:59+07:00') : new Date(borrower.suspendedUntil);
+      let untilDate = borrower.suspendedUntil.length === 10 ? new Date(borrower.suspendedUntil + 'T00:00:00+07:00') : new Date(borrower.suspendedUntil);
       if (untilDate > now) {
         return true;
       }

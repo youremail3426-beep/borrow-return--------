@@ -33,7 +33,7 @@ const Borrower = {
     let suspensionReason = borrower.suspensionReason;
     
     if (isSuspended && suspendedUntil) {
-      let untilDate = suspendedUntil.length === 10 ? new Date(suspendedUntil + 'T23:59:59+07:00') : new Date(suspendedUntil);
+      let untilDate = suspendedUntil.length === 10 ? new Date(suspendedUntil + 'T00:00:00+07:00') : new Date(suspendedUntil);
       if (untilDate < new Date()) {
         isSuspended = false;
         suspendedUntil = '';
@@ -71,7 +71,7 @@ const Borrower = {
       let suspensionReason = b.suspensionReason;
       
       if (isSuspended && suspendedUntil) {
-        let untilDate = suspendedUntil.length === 10 ? new Date(suspendedUntil + 'T23:59:59+07:00') : new Date(suspendedUntil);
+        let untilDate = suspendedUntil.length === 10 ? new Date(suspendedUntil + 'T00:00:00+07:00') : new Date(suspendedUntil);
         if (untilDate < now) {
           isSuspended = false;
           suspendedUntil = '';
