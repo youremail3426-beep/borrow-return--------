@@ -3,6 +3,7 @@ import Navbar from '../../components/public/Navbar';
 import api from '../../services/api';
 import { Search, Info, ZoomIn, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getDisplayImageUrl } from '../../utils/image';
 
 interface Equipment {
     id: string;
@@ -119,7 +120,7 @@ export default function Home() {
                                 <div className="h-48 bg-gray-100 overflow-hidden relative">
                                     {item.imageUrl ? (
                                         <>
-                                            <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                            <img src={getDisplayImageUrl(item.imageUrl)} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                             {/* Full screen preview button */}
                                             <button 
                                                 onClick={(e) => { e.stopPropagation(); setPreviewImage(item.imageUrl || null); }}
@@ -190,7 +191,7 @@ export default function Home() {
                         <X size={32} />
                     </button>
                     <img 
-                        src={previewImage} 
+                        src={getDisplayImageUrl(previewImage)} 
                         alt="Preview" 
                         className="max-w-[95vw] max-h-[90vh] object-contain rounded-lg shadow-2xl animate-scaleIn" 
                         onClick={(e) => e.stopPropagation()} 

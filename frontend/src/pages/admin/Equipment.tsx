@@ -3,6 +3,7 @@ import AdminSidebar from '../../components/admin/AdminSidebar';
 import api from '../../services/api';
 import Swal from 'sweetalert2';
 import { Plus, Edit, Trash2, Search, Image as ImageIcon } from 'lucide-react';
+import { getDisplayImageUrl } from '../../utils/image';
 
 interface Equipment {
     id: string;
@@ -218,7 +219,7 @@ export default function AdminEquipment() {
                                     <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="w-12 h-12 bg-gray-200 rounded-lg overflow-hidden flex items-center justify-center text-gray-400">
-                                                {item.imageUrl ? <img src={item.imageUrl} className="w-full h-full object-cover" /> : <ImageIcon size={20} />}
+                                                {item.imageUrl ? <img src={getDisplayImageUrl(item.imageUrl)} className="w-full h-full object-cover" /> : <ImageIcon size={20} />}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 font-medium text-gray-800">{item.name}</td>

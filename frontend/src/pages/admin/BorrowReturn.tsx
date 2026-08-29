@@ -4,6 +4,7 @@ import TermsAndConditionsModal from '../../components/TermsAndConditionsModal';
 import api from '../../services/api';
 import Swal from 'sweetalert2';
 import { ArrowRight, RotateCcw, User, Box, Search, CheckSquare, Square, ZoomIn, X } from 'lucide-react';
+import { getDisplayImageUrl } from '../../utils/image';
 
 export default function AdminBorrowReturn() {
     const [activeTab, setActiveTab] = useState<'BORROW' | 'RETURN'>('BORROW');
@@ -512,12 +513,12 @@ export default function AdminBorrowReturn() {
                                                             }}
                                                         >
                                                             {eq.imageUrl ? (
-                                                                <>
-                                                                    <img src={eq.imageUrl} alt={eq.name} className="w-full h-full object-cover" />
-                                                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
+                                                                <div className="w-full h-full cursor-pointer relative group">
+                                                                    <img src={getDisplayImageUrl(eq.imageUrl)} alt={eq.name} className="w-full h-full object-cover" />
+                                                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                                                         <ZoomIn size={16} className="text-white" />
                                                                     </div>
-                                                                </>
+                                                                </div>
                                                             ) : (
                                                                 <div className="w-full h-full flex items-center justify-center text-gray-400"><Box size={18} /></div>
                                                             )}
@@ -647,12 +648,12 @@ export default function AdminBorrowReturn() {
                                                             }}
                                                         >
                                                             {item.imageUrl ? (
-                                                                <>
-                                                                    <img src={item.imageUrl} alt={item.equipmentName} className="w-full h-full object-cover" />
+                                                                <div className="w-full h-full cursor-pointer relative group/img">
+                                                                    <img src={getDisplayImageUrl(item.imageUrl)} alt={item.equipmentName} className="w-full h-full object-cover" />
                                                                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
                                                                         <ZoomIn size={16} className="text-white" />
                                                                     </div>
-                                                                </>
+                                                                </div>
                                                             ) : (
                                                                 <div className="w-full h-full flex items-center justify-center text-gray-400"><Box size={20} /></div>
                                                             )}
@@ -728,7 +729,7 @@ export default function AdminBorrowReturn() {
                         <X size={32} />
                     </button>
                     <img 
-                        src={previewImage} 
+                        src={getDisplayImageUrl(previewImage)} 
                         alt="Preview" 
                         className="max-w-[95vw] max-h-[90vh] object-contain rounded-lg shadow-2xl animate-scaleIn" 
                         onClick={(e) => e.stopPropagation()} 

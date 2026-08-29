@@ -3,6 +3,7 @@ import Navbar from '../../components/public/Navbar';
 import TermsAndConditionsModal from '../../components/TermsAndConditionsModal';
 import api from '../../services/api';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { getDisplayImageUrl } from '../../utils/image';
 import { Trash2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
@@ -275,7 +276,7 @@ export default function CartPage() {
                                     <li key={item.id} className="flex gap-4 p-3 bg-gray-50 rounded-lg">
                                         <div className="w-16 h-16 bg-gray-200 rounded-md overflow-hidden">
                                             {item.imageUrl ? (
-                                                <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                                                <img src={getDisplayImageUrl(item.imageUrl)} alt={item.name} className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="w-full h-full bg-gray-200" />
                                             )}
