@@ -45,6 +45,7 @@ const Reservation = {
         borrowDate: res.borrowDate,
         returnDate: res.returnDate,
         status: res.status || 'PENDING',
+        createdAt: res.createdAt || new Date(0).toISOString(),
         items: itemsByRes[res.id] || []
       };
     });

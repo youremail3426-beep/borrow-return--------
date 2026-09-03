@@ -174,6 +174,28 @@ function jsonResponse(data, statusCode = 200) {
 }
 
 /**
+ * Run this function ONCE from the Apps Script editor to set up the daily automated checks.
+ */
+function setupTriggers() {
+  const triggers = ScriptApp.getProjectTriggers();
+  for (let i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'checkDueDates') {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+  
+  // Set to run every day between 1 AM and 2 AM
+  ScriptApp.newTrigger('checkDueDates')
+    .timeBased()
+    .everyDays(1)
+    .atHour(1)
+    .create();
+    
+  // Run once immediately to apply right now
+  checkDueDates();
+}
+
+/**
  * Cron function to check for due dates (Triggered once a day by GAS trigger)
  */
 function checkDueDates() {
@@ -198,7 +220,7 @@ function checkDueDates() {
     Email.sendUnsuspend(b.email, b.name, false);
   }
 
-  // 2. Check Missed Pickups
+  // 2. Check Missed Pickups (APPROVED)
   const reservations = Database.getAll('Reservations');
   const missedPickups = reservations.filter(r => 
     r.status === 'APPROVED' && new Date(r.borrowDate).toISOString() < todayStart
@@ -224,6 +246,19 @@ function checkDueDates() {
     const b = Database.getById('Borrowers', r.borrowerId);
     if (b) {
       Email.sendSuspensionMissedPickup(b.email, b.name, suspendDate.toLocaleDateString('th-TH'));
+    }
+  }
+
+  // 2.5 Expired PENDING reservations (Reject and free items, NO suspension because admin didn't approve)
+  const expiredPending = reservations.filter(r => 
+    r.status === 'PENDING' && new Date(r.borrowDate).toISOString() < todayStart
+  );
+  
+  for (const r of expiredPending) {
+    Database.update('Reservations', r.id, { status: 'REJECTED' });
+    const items = Database.find('ReservationItems', 'reservationId', r.id);
+    for (const item of items) {
+      Database.update('Equipments', item.equipmentId, { status: 'AVAILABLE' });
     }
   }
 

@@ -17,6 +17,7 @@ interface Reservation {
     suspendedUntil?: string;
     borrowDate: string;
     returnDate: string;
+    createdAt?: string;
     status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
     items: {
         equipment: {
@@ -42,6 +43,7 @@ export default function AdminReservations() {
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [loadingActionId, setLoadingActionId] = useState<string | null>(null); // Track which item is processing
     const [isBulkDeleting, setIsBulkDeleting] = useState(false); // Bulk delete loading state
+    const [queueMap, setQueueMap] = useState<Record<string, Record<string, number>>>({});
 
     useEffect(() => {
         fetchReservations();
@@ -50,7 +52,38 @@ export default function AdminReservations() {
     const fetchReservations = async () => {
         try {
             const res = await api.get('/reservations');
-            setReservations(res.data);
+            const data: Reservation[] = res.data;
+            
+            // Sort by createdAt descending (newest first)
+            data.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+            
+            // Calculate queues for duplicate equipments in pending status
+            const pendingRes = data.filter(r => r.status === 'PENDING').sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime());
+            const totalEqUsage: Record<string, number> = {};
+            
+            pendingRes.forEach(r => {
+                r.items.forEach(item => {
+                    const sn = item.equipment.serialNumber;
+                    totalEqUsage[sn] = (totalEqUsage[sn] || 0) + 1;
+                });
+            });
+            
+            const currentEqQueue: Record<string, number> = {};
+            const newQueueMap: Record<string, Record<string, number>> = {};
+            
+            pendingRes.forEach(r => {
+                newQueueMap[r.id] = {};
+                r.items.forEach(item => {
+                    const sn = item.equipment.serialNumber;
+                    if (totalEqUsage[sn] > 1) {
+                        currentEqQueue[sn] = (currentEqQueue[sn] || 0) + 1;
+                        newQueueMap[r.id][sn] = currentEqQueue[sn];
+                    }
+                });
+            });
+            
+            setQueueMap(newQueueMap);
+            setReservations(data);
             setSelectedIds(new Set());
         } catch (error) {
             console.error('Error fetching reservations:', error);
@@ -273,9 +306,20 @@ export default function AdminReservations() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <ul className="text-sm text-gray-600 list-disc list-inside">
-                                                    {res.items.map((item, idx) => (
-                                                        <li key={idx}>{item.equipment.name} <span className="text-xs text-gray-400">({item.equipment.serialNumber})</span></li>
-                                                    ))}
+                                                    {res.items.map((item, idx) => {
+                                                        const sn = item.equipment.serialNumber;
+                                                        const queue = queueMap[res.id]?.[sn];
+                                                        return (
+                                                            <li key={idx}>
+                                                                {item.equipment.name} <span className="text-xs text-gray-400">({sn})</span>
+                                                                {queue && (
+                                                                    <span className="ml-2 bg-red-100 text-red-600 text-[10px] px-2 py-0.5 rounded-full font-bold">
+                                                                        คิวที่ {queue}
+                                                                    </span>
+                                                                )}
+                                                            </li>
+                                                        );
+                                                    })}
                                                 </ul>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-600">
