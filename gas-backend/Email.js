@@ -316,5 +316,33 @@ const Email = {
       </div>
     `;
     this._send(borrowerEmail, subject, htmlBody);
+  },
+
+  sendOverdueWarning(borrowerEmail, borrowerName, items, dueDate, fineAmount) {
+    const subject = 'แจ้งเตือน: เกินกำหนดคืนอุปกรณ์ (Overdue Warning)';
+    const itemsListHtml = items.map((item, index) => `<li>${index + 1}. ${item}</li>`).join('');
+
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <img src="cid:logoImage" alt="SMO FTE Logo" style="max-width: 150px; height: auto;" />
+        </div>
+        <h2 style="color: #c0392b; text-align: center;">แจ้งเตือนเกินกำหนดคืนอุปกรณ์</h2>
+        <p>เรียน คุณ <strong>${borrowerName}</strong>,</p>
+        <p style="color: red; font-weight: bold;">เราพบว่าคุณมีรายการอุปกรณ์ที่เลยกำหนดส่งคืนแล้ว (กำหนดคืน: ${dueDate})</p>
+        <ul>${itemsListHtml}</ul>
+        <div style="background-color: #ffebee; border-left: 4px solid #f44336; padding: 15px; margin: 15px 0;">
+           <p style="color: #c62828; margin: 0; font-weight: bold;">⚠️ ขณะนี้คุณมีค่าปรับสะสมเบื้องต้น: ${fineAmount} บาท</p>
+           <p style="color: #d32f2f; margin: 5px 0 0 0; font-size: 14px;">(คิดค่าปรับ 20 บาท/ชิ้น/วัน *ไม่รวมวันหยุดเสาร์-อาทิตย์)</p>
+        </div>
+        <p>กรุณานำอุปกรณ์มาคืนที่ห้องสโมสรโดยด่วน เพื่อหยุดการคิดค่าปรับเพิ่มเติมและรับสิทธิ์การใช้งานคืน</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
+        <p style="font-size: 12px; color: #7f8c8d; text-align: center;">
+          สโมสรนักศึกษาคณะครุศาสตร์อุตสาหกรรม<br/>มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ<br/>
+          (อีเมลนี้เป็นการแจ้งเตือนอัตโนมัติ กรุณาอย่าตอบกลับ)
+        </p>
+      </div>
+    `;
+    this._send(borrowerEmail, subject, htmlBody);
   }
 };

@@ -196,6 +196,30 @@ function setupTriggers() {
 }
 
 /**
+ * Calculate working days (excluding weekends) between two dates
+ */
+function calculateOverdueWorkingDays(startDate, endDate) {
+  let count = 0;
+  const curDate = new Date(startDate.getTime());
+  curDate.setHours(0, 0, 0, 0);
+  const end = new Date(endDate.getTime());
+  end.setHours(0, 0, 0, 0);
+
+  // เริ่มนับวันถัดจากวันครบกำหนด
+  curDate.setDate(curDate.getDate() + 1);
+
+  while (curDate <= end) {
+    const dayOfWeek = curDate.getDay();
+    // 0 = Sunday, 6 = Saturday (ไม่นับเสาร์-อาทิตย์)
+    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+      count++;
+    }
+    curDate.setDate(curDate.getDate() + 1);
+  }
+  return count;
+}
+
+/**
  * Cron function to check for due dates (Triggered once a day by GAS trigger)
  */
 function checkDueDates() {
@@ -270,24 +294,38 @@ function checkDueDates() {
 
   for (const tx of overdueTransactions) {
     const b = Database.getById('Borrowers', tx.borrowerId);
-    if (b && (!b.isSuspended || b.suspensionType !== 'OVERDUE')) {
-      Database.update('Borrowers', tx.borrowerId, {
-        isSuspended: true,
-        suspensionType: 'OVERDUE',
-        suspendedUntil: '',
-        suspensionReason: 'มียอดค้างส่งคืนอุปกรณ์'
-      });
-
+    if (b) {
       const txItems = Database.find('BorrowItems', 'transactionId', tx.id);
       const equipmentNames = [];
+      let unreturnedCount = 0;
       for (const tItem of txItems) {
         if (!tItem.returnedAt) {
+          unreturnedCount++;
           const eq = Database.getById('Equipments', tItem.equipmentId);
           if (eq) equipmentNames.push(eq.name);
         }
       }
 
-      Email.sendSuspensionOverdue(b.email, b.name, equipmentNames);
+      if (unreturnedCount > 0) {
+        // คำนวณค่าปรับ 20 บาท ต่อวันทำการ ต่อชิ้น
+        const dueDate = new Date(tx.dueDate);
+        const daysOverdue = calculateOverdueWorkingDays(dueDate, now);
+        const fineAmount = unreturnedCount * daysOverdue * 20;
+
+        // ส่งอีเมลเตือนยอดค่าปรับ
+        Email.sendOverdueWarning(b.email, b.name, equipmentNames, dueDate.toLocaleDateString('th-TH'), fineAmount);
+
+        // ระงับสิทธิ์ถ้ายังไม่ได้โดนระงับด้วยสาเหตุค้างส่ง
+        if (!b.isSuspended || b.suspensionType !== 'OVERDUE') {
+          Database.update('Borrowers', tx.borrowerId, {
+            isSuspended: true,
+            suspensionType: 'OVERDUE',
+            suspendedUntil: '',
+            suspensionReason: 'มียอดค้างส่งคืนอุปกรณ์'
+          });
+          Email.sendSuspensionOverdue(b.email, b.name, equipmentNames);
+        }
+      }
     }
   }
 }
