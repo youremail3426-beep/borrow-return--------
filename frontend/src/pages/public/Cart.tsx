@@ -117,9 +117,7 @@ export default function CartPage() {
 
         typingTimeoutRef.current = setTimeout(() => {
             let searchType: 'name' | 'email' | 'studentId' | '' = '';
-            if (field === 'borrowerName') searchType = 'name';
-            else if (field === 'borrowerEmail') searchType = 'email';
-            else if (field === 'studentId') searchType = 'studentId';
+            if (field === 'studentId') searchType = 'studentId';
 
             if (searchType) {
                 fetchBorrowerInfo(searchType, value);
