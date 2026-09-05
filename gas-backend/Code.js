@@ -35,7 +35,7 @@ function doGet(e) {
     else if (path.match(/^\/borrow\/([^\/]+)$/)) {
       const id = path.split('/')[2];
       const all = Borrow.getAllPopulated();
-      result = all.find(tx => tx.id === id);
+      result = all.find(tx => String(tx.id) === String(id));
       if (!result) throw new Error('Transaction not found');
     }
     else if (path === '/borrowers') {

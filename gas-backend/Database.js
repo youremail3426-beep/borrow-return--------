@@ -69,7 +69,7 @@ const Database = {
    */
   getById(sheetName, id) {
     const all = this.getAll(sheetName);
-    return all.find(row => row.id === id) || null;
+    return all.find(row => String(row.id) === String(id)) || null;
   },
 
   /**
@@ -77,7 +77,7 @@ const Database = {
    */
   find(sheetName, field, value) {
     const all = this.getAll(sheetName);
-    return all.filter(row => row[field] === value);
+    return all.filter(row => String(row[field]) === String(value));
   },
 
   /**
@@ -118,7 +118,7 @@ const Database = {
 
     for (let i = 1; i < data.length; i++) {
       const idIndex = headers.indexOf('id');
-      if (data[i][idIndex] === id) {
+      if (String(data[i][idIndex]) === String(id)) {
         for (const key in updateData) {
           const colIndex = headers.indexOf(key);
           if (colIndex !== -1) {
@@ -143,7 +143,7 @@ const Database = {
     const idIndex = headers.indexOf('id');
 
     for (let i = 1; i < data.length; i++) {
-      if (data[i][idIndex] === id) {
+      if (String(data[i][idIndex]) === String(id)) {
         sheet.deleteRow(i + 1);
         return true;
       }
