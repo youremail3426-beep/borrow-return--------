@@ -146,12 +146,17 @@ const Reservation = {
     }
 
     try {
-      const adminEmail = Session.getEffectiveUser().getEmail();
-      if (adminEmail) {
-        Email.sendReservationRequestToAdmin(adminEmail, borrower.name, newRes, reservedItemsList);
+      const allAdmins = Database.getAll('Admins');
+      const adminEmails = allAdmins
+        .map(admin => admin.personalEmail)
+        .filter(email => email && email.trim() !== "")
+        .join(",");
+        
+      if (adminEmails) {
+        Email.sendReservationRequestToAdmin(adminEmails, borrower.name, newRes, reservedItemsList);
       }
     } catch (e) {
-      console.error("Could not get admin email", e);
+      console.error("Could not send admin emails", e);
     }
 
     return newRes;

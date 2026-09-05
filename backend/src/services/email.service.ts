@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
+import prisma from '../prisma';
 
 dotenv.config();
 
@@ -15,7 +16,7 @@ const transporter = nodemailer.createTransport({
 
 const logoPath = path.join(__dirname, '../assets/logo.png');
 
-export const sendEmail = async (to: string, subject: string, html: string) => {
+export const sendEmail = async (to: string | string[], subject: string, html: string) => {
     try {
         const hasLogo = fs.existsSync(logoPath);
 
@@ -229,9 +230,16 @@ export const sendBorrowConfirmation = async (to: string, name: string, items: st
 };
 
 export const sendAdminNewReservationNotification = async (borrowerName: string, itemsCount: number, borrowDate: string, returnDate: string) => {
+    // Fetch all admins from the database
+    const admins = await prisma.admin.findMany({ select: { email: true } });
+    let adminEmails: string | string[] = admins.map(admin => admin.email);
+
     // กำหนดให้ส่งอีเมลหาแอดมิน โดยตั้งค่าผ่าน .env หากไม่มีจะใช้ EMAIL_USER อันเดียวกันกับที่ใช้ส่ง
-    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
-    if (!adminEmail) return;
+    if (adminEmails.length === 0) {
+        adminEmails = process.env.ADMIN_EMAIL || process.env.EMAIL_USER || '';
+    }
+
+    if (!adminEmails || (Array.isArray(adminEmails) && adminEmails.length === 0)) return;
 
     const subject = `[แจ้งเตือน] มีคำขอจองอุปกรณ์ใหม่จาก ${borrowerName}`;
     const html = `
@@ -248,7 +256,7 @@ export const sendAdminNewReservationNotification = async (borrowerName: string, 
             <p style="font-size: 14px; color: #555;">กรุณาล็อกอินเข้าระบบหลังบ้าน เพื่อทำการ <strong style="color: green;">อนุมัติ</strong> หรือ <strong style="color: red;">ปฏิเสธ</strong> คำขอนี้</p>
         </div>
     `;
-    await sendEmail(adminEmail, subject, html);
+    await sendEmail(adminEmails, subject, html);
 };
 
 export const sendSuspensionMissedPickup = async (to: string, name: string, suspendedUntil: string) => {
