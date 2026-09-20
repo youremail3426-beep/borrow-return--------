@@ -20,7 +20,8 @@ const Database = {
       'Reservations': ['id', 'borrowerId', 'borrowDate', 'returnDate', 'status', 'createdAt', 'updatedAt'],
       'ReservationItems': ['id', 'reservationId', 'equipmentId'],
       'BorrowTransactions': ['id', 'borrowerId', 'borrowDate', 'dueDate', 'returnedDate', 'notes', 'conditionImageUrl', 'adminId', 'returnAdminName', 'createdAt', 'updatedAt'],
-      'BorrowItems': ['id', 'transactionId', 'equipmentId', 'returnedAt']
+      'BorrowItems': ['id', 'transactionId', 'equipmentId', 'returnedAt'],
+      'Announcements': ['id', 'title', 'content', 'isActive', 'createdAt', 'updatedAt']
     };
 
     for (const [sheetName, headers] of Object.entries(schema)) {

@@ -41,6 +41,11 @@ function doGet(e) {
     else if (path === '/borrowers') {
       result = Borrower.getAll();
     }
+    else if (path === '/announcements') {
+      // Return sorted by date (newest first)
+      const all = Announcement.getAll();
+      result = all.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
     else if (path.startsWith('/reservations/borrower/search')) {
       try {
         result = Borrower.search({
@@ -149,6 +154,13 @@ function doPost(e) {
     else if (path.match(/^\/borrowers\/(.+)\/unsuspend$/) && method === 'POST') {
       const id = path.split('/')[2];
       result = Borrower.unsuspend(id);
+    }
+    else if (path === '/announcements' && method === 'POST') {
+      result = Announcement.create(body);
+    }
+    else if (path.match(/^\/announcements\/(.+)$/) && method === 'DELETE') {
+      const id = path.split('/')[2];
+      result = Announcement.delete(id);
     }
     else {
       return jsonResponse({ error: 'Route not found' }, 404);
