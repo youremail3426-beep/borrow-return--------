@@ -341,3 +341,9 @@ function checkDueDates() {
     }
   }
 }
+/**
+ * Run initDb
+ */
+function runInitDb() {
+  Database.initDb();
+}
