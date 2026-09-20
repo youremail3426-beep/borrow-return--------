@@ -10,6 +10,7 @@ import { checkDueDates } from './services/cron.service';
 import { getTransactionById } from './controllers/borrow.controller';
 import { getReservationById } from './controllers/reservation.controller';
 import borrowerRoutes from './routes/borrower.routes';
+import announcementRoutes from './routes/announcement.routes';
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use('/api/equipments', equipmentRoutes);
 app.use('/api/reservations', reservationRoutes);
 app.use('/api/borrow', borrowRoutes);
 app.use('/api/borrowers', borrowerRoutes);
+app.use('/api/announcements', announcementRoutes);
 
 // Public Email Links
 app.get('/api/public/borrow/:id', getTransactionById);

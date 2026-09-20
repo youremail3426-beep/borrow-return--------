@@ -108,3 +108,12 @@ model BorrowItem {
   transaction   BorrowTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
   equipment     Equipment         @relation(fields: [equipmentId], references: [id])
 }
+
+model Announcement {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

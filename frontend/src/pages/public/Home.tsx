@@ -4,6 +4,15 @@ import api from '../../services/api';
 import { Search, Info, ZoomIn, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getDisplayImageUrl } from '../../utils/image';
+import { Megaphone } from 'lucide-react';
+
+interface Announcement {
+    id: string;
+    title: string;
+    content: string;
+    isActive: boolean;
+    createdAt: string;
+}
 
 interface Equipment {
     id: string;
@@ -26,6 +35,7 @@ export default function Home() {
         }
     });
     const [loading, setLoading] = useState(true);
+    const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     useEffect(() => {
@@ -35,6 +45,7 @@ export default function Home() {
 
     useEffect(() => {
         fetchEquipments();
+        fetchAnnouncements();
     }, []);
 
     useEffect(() => {
@@ -58,6 +69,17 @@ export default function Home() {
             console.error('Error fetching equipments:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchAnnouncements = async () => {
+        try {
+            const res = await api.get('/announcements');
+            // Filter only active announcements
+            const active = res.data.filter((a: Announcement) => a.isActive);
+            setAnnouncements(active);
+        } catch (error) {
+            console.error('Error fetching announcements:', error);
         }
     };
 
@@ -94,8 +116,27 @@ export default function Home() {
                 </div>
             </div>
 
+            {/* Announcements Section */}
+            {announcements.length > 0 && (
+                <div className="container mx-auto px-4 -mt-16 mb-8 relative z-10">
+                    <div className="max-w-4xl mx-auto space-y-4">
+                        {announcements.map((ann) => (
+                            <div key={ann.id} className="bg-white/95 backdrop-blur-md border-l-4 border-yellow-400 p-4 rounded-r-xl shadow-lg flex gap-4 items-start">
+                                <div className="bg-yellow-100 text-yellow-600 p-2 rounded-full flex-shrink-0 mt-1">
+                                    <Megaphone size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-gray-800 text-lg">{ann.title}</h3>
+                                    <p className="text-gray-600 whitespace-pre-wrap mt-1">{ann.content}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Equipment List */}
-            <div className="container mx-auto px-4 -mt-12">
+            <div className={`container mx-auto px-4 ${announcements.length === 0 ? '-mt-12' : 'mt-4'}`}>
                 {loading ? (
                     <div className="text-center py-20 text-gray-500">กำลังโหลดข้อมูล...</div>
                 ) : (
