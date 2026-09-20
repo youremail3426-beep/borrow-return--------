@@ -9,7 +9,7 @@ interface Equipment {
     id: string;
     name: string;
     serialNumber: string;
-    status: 'AVAILABLE' | 'RESERVED' | 'BORROWED';
+    status: 'AVAILABLE' | 'RESERVED' | 'BORROWED' | 'MAINTENANCE';
     imageUrl?: string;
 }
 
