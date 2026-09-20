@@ -11,6 +11,7 @@ import AdminHistory from './pages/admin/History';
 import PrintBorrowForm from './pages/admin/PrintBorrowForm';
 import AdminBorrowers from './pages/admin/Borrowers';
 import AdminAnnouncements from './pages/admin/Announcements';
+import AdminSettings from './pages/admin/Settings';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/admin/history" element={<AdminHistory />} />
         <Route path="/admin/borrowers" element={<AdminBorrowers />} />
         <Route path="/admin/announcements" element={<AdminAnnouncements />} />
+        <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/print/:id" element={<PrintBorrowForm />} />
       </Routes>
 

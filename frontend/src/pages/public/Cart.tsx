@@ -4,7 +4,7 @@ import TermsAndConditionsModal from '../../components/TermsAndConditionsModal';
 import api from '../../services/api';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { getDisplayImageUrl } from '../../utils/image';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Wrench } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 interface Equipment {
@@ -21,6 +21,7 @@ export default function CartPage() {
     const [submitting, setSubmitting] = useState(false);
     const [isSuspended, setIsSuspended] = useState(false);
     const [showTermsModal, setShowTermsModal] = useState(false);
+    const [systemSettings, setSystemSettings] = useState<{ SYSTEM_STATUS: string, MAINTENANCE_MESSAGE: string } | null>(null);
     const [formData, setFormData] = useState({
         borrowerName: '',
         borrowerEmail: '',
@@ -49,6 +50,8 @@ export default function CartPage() {
             confirmButtonColor: '#0F5132',
             confirmButtonText: 'รับทราบ'
         });
+
+        api.get('/settings').then(res => setSystemSettings(res.data)).catch(console.error);
     }, []);
 
     useEffect(() => {
@@ -197,6 +200,10 @@ export default function CartPage() {
             return Swal.fire('แจ้งเตือน', 'ยืมได้สูงสุดไม่เกิน 3 วัน', 'warning');
         }
 
+        if (systemSettings?.SYSTEM_STATUS === 'MAINTENANCE') {
+            return Swal.fire('ไม่สามารถจองได้', 'ระบบกำลังอยู่ในช่วงปิดปรับปรุง', 'error');
+        }
+
         if (isSuspended) {
             return Swal.fire('ไม่สามารถจองได้', 'บัญชีของท่านอยู่ระหว่างถูกระงับสิทธิ์', 'error');
         }
@@ -253,6 +260,25 @@ export default function CartPage() {
             setSubmitting(false);
         }
     };
+
+    if (systemSettings?.SYSTEM_STATUS === 'MAINTENANCE') {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+                <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl max-w-lg w-full text-center border-t-8 border-yellow-500 animate-slideUp">
+                    <div className="w-24 h-24 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Wrench size={48} />
+                    </div>
+                    <h1 className="text-3xl font-bold text-gray-800 mb-4">ระบบปิดปรับปรุงชั่วคราว</h1>
+                    <p className="text-gray-600 mb-8 text-lg">
+                        {systemSettings.MAINTENANCE_MESSAGE || 'ขออภัยในความไม่สะดวก ระบบกำลังอยู่ในช่วงปิดปรับปรุง กรุณากลับมาใช้งานใหม่อีกครั้งในภายหลัง'}
+                    </p>
+                    <div className="w-full bg-gray-100 rounded-lg p-4">
+                        <p className="text-sm text-gray-500 font-mono text-left">SYSTEM_STATUS: MAINTENANCE</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">

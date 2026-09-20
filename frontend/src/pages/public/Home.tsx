@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from '../../components/public/Navbar';
 import api from '../../services/api';
-import { Search, Info, ZoomIn, X } from 'lucide-react';
+import { Search, Info, ZoomIn, X, Wrench } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { getDisplayImageUrl } from '../../utils/image';
 import { Megaphone } from 'lucide-react';
@@ -19,7 +19,7 @@ interface Equipment {
     name: string;
     serialNumber: string;
     imageUrl?: string;
-    status: 'AVAILABLE' | 'RESERVED' | 'BORROWED';
+    status: 'AVAILABLE' | 'RESERVED' | 'BORROWED' | 'MAINTENANCE';
 }
 
 export default function Home() {
@@ -37,6 +37,7 @@ export default function Home() {
     const [loading, setLoading] = useState(true);
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [systemSettings, setSystemSettings] = useState<{ SYSTEM_STATUS: string, MAINTENANCE_MESSAGE: string } | null>(null);
 
     useEffect(() => {
         localStorage.setItem('cartItems', JSON.stringify(selectedItems));
@@ -44,6 +45,7 @@ export default function Home() {
     }, [selectedItems]);
 
     useEffect(() => {
+        fetchSettings();
         fetchEquipments();
         fetchAnnouncements();
     }, []);
@@ -59,6 +61,15 @@ export default function Home() {
             ));
         }
     }, [search, allEquipments]);
+
+    const fetchSettings = async () => {
+        try {
+            const res = await api.get('/settings');
+            setSystemSettings(res.data);
+        } catch (error) {
+            console.error('Error fetching settings:', error);
+        }
+    };
 
     const fetchEquipments = async () => {
         try {
@@ -92,6 +103,25 @@ export default function Home() {
                 : [...prev, id]
         );
     };
+
+    if (systemSettings?.SYSTEM_STATUS === 'MAINTENANCE') {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+                <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl max-w-lg w-full text-center border-t-8 border-yellow-500 animate-slideUp">
+                    <div className="w-24 h-24 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Wrench size={48} />
+                    </div>
+                    <h1 className="text-3xl font-bold text-gray-800 mb-4">ระบบปิดปรับปรุงชั่วคราว</h1>
+                    <p className="text-gray-600 mb-8 text-lg">
+                        {systemSettings.MAINTENANCE_MESSAGE || 'ขออภัยในความไม่สะดวก ระบบกำลังอยู่ในช่วงปิดปรับปรุง กรุณากลับมาใช้งานใหม่อีกครั้งในภายหลัง'}
+                    </p>
+                    <div className="w-full bg-gray-100 rounded-lg p-4">
+                        <p className="text-sm text-gray-500 font-mono text-left">SYSTEM_STATUS: MAINTENANCE</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
@@ -149,12 +179,15 @@ export default function Home() {
                                 onClick={() => toggleSelection(item.id, item.status)}
                             >
                                 {/* Status Badge */}
-                                <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold shadow-sm z-10 ${item.status === 'AVAILABLE' ? 'bg-green-100 text-green-700' :
+                                <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold shadow-sm z-10 ${
+                                    item.status === 'AVAILABLE' ? 'bg-green-100 text-green-700' :
                                     item.status === 'RESERVED' ? 'bg-orange-100 text-orange-700' :
-                                        'bg-red-100 text-red-700'
+                                    item.status === 'MAINTENANCE' ? 'bg-gray-200 text-gray-700' :
+                                    'bg-red-100 text-red-700'
                                     }`}>
                                     {item.status === 'AVAILABLE' ? 'ว่าง' :
-                                        item.status === 'RESERVED' ? 'ถูกจอง' : 'ถูกยืม'}
+                                     item.status === 'RESERVED' ? 'ถูกจอง' : 
+                                     item.status === 'MAINTENANCE' ? 'ปิดปรับปรุง' : 'ถูกยืม'}
                                 </div>
 
                                 {/* Image */}

@@ -21,7 +21,8 @@ const Database = {
       'ReservationItems': ['id', 'reservationId', 'equipmentId'],
       'BorrowTransactions': ['id', 'borrowerId', 'borrowDate', 'dueDate', 'returnedDate', 'notes', 'conditionImageUrl', 'adminId', 'returnAdminName', 'createdAt', 'updatedAt'],
       'BorrowItems': ['id', 'transactionId', 'equipmentId', 'returnedAt'],
-      'Announcements': ['id', 'title', 'content', 'isActive', 'createdAt', 'updatedAt']
+      'Announcements': ['id', 'title', 'content', 'isActive', 'createdAt', 'updatedAt'],
+      'Settings': ['id', 'key', 'value', 'createdAt', 'updatedAt']
     };
 
     for (const [sheetName, headers] of Object.entries(schema)) {
@@ -39,6 +40,13 @@ const Database = {
     const adminsSheet = ss.getSheetByName('Admins');
     if (adminsSheet.getLastRow() <= 1) {
        adminsSheet.appendRow(['admin-1', 'admin@admin.com', 'smofte', 'Super Admin', new Date().toISOString(), new Date().toISOString()]);
+    }
+    
+    // Create default settings if not exists
+    const settingsSheet = ss.getSheetByName('Settings');
+    if (settingsSheet.getLastRow() <= 1) {
+       settingsSheet.appendRow([Utilities.getUuid(), 'SYSTEM_STATUS', 'ACTIVE', new Date().toISOString(), new Date().toISOString()]);
+       settingsSheet.appendRow([Utilities.getUuid(), 'MAINTENANCE_MESSAGE', 'ระบบปิดปรับปรุงชั่วคราว', new Date().toISOString(), new Date().toISOString()]);
     }
   },
 

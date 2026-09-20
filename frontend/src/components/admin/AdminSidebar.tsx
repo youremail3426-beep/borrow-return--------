@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, FileText, ArrowLeftRight, LogOut, History as HistoryIcon, Menu, X, Users, Megaphone } from 'lucide-react';
+import { LayoutDashboard, Package, FileText, ArrowLeftRight, LogOut, History as HistoryIcon, Menu, X, Users, Megaphone, Settings as SettingsIcon } from 'lucide-react';
 
 import logo from '../../assets/logo.png';
 
@@ -16,6 +16,7 @@ const AdminSidebar = () => {
         { path: '/admin/borrowers', icon: Users, label: 'รายชื่อผู้ยืม' },
         { path: '/admin/history', icon: HistoryIcon, label: 'ประวัติ' },
         { path: '/admin/announcements', icon: Megaphone, label: 'ประกาศ' },
+        { path: '/admin/settings', icon: SettingsIcon, label: 'ตั้งค่าระบบ' },
     ];
 
     const handleLogout = () => {

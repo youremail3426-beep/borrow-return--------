@@ -41,6 +41,9 @@ function doGet(e) {
     else if (path === '/borrowers') {
       result = Borrower.getAll();
     }
+    else if (path === '/settings') {
+      result = Settings.getAll();
+    }
     else if (path === '/announcements') {
       // Return sorted by date (newest first)
       const all = Announcement.getAll();
@@ -161,6 +164,9 @@ function doPost(e) {
     else if (path.match(/^\/announcements\/(.+)$/) && method === 'DELETE') {
       const id = path.split('/')[2];
       result = Announcement.delete(id);
+    }
+    else if (path === '/settings' && method === 'PUT') {
+      result = Settings.setMultiple(body);
     }
     else {
       return jsonResponse({ error: 'Route not found' }, 404);

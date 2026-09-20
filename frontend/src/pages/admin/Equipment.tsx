@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import AdminSidebar from '../../components/admin/AdminSidebar';
 import api from '../../services/api';
 import Swal from 'sweetalert2';
-import { Plus, Edit, Trash2, Search, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Image as ImageIcon, Wrench } from 'lucide-react';
 import { getDisplayImageUrl } from '../../utils/image';
 
 interface Equipment {
@@ -171,6 +171,36 @@ export default function AdminEquipment() {
         }
     };
 
+    const handleToggleMaintenance = async (item: Equipment) => {
+        if (item.status !== 'AVAILABLE' && item.status !== 'MAINTENANCE') {
+            Swal.fire('ผิดพลาด', 'ไม่สามารถปิดปรับปรุงอุปกรณ์ที่กำลังถูกยืมหรือถูกจองได้', 'error');
+            return;
+        }
+
+        const newStatus = item.status === 'AVAILABLE' ? 'MAINTENANCE' : 'AVAILABLE';
+        const actionText = newStatus === 'MAINTENANCE' ? 'ปิดปรับปรุงชั่วคราว' : 'เปิดใช้งาน';
+
+        const result = await Swal.fire({
+            title: `ยืนยันการ${actionText}?`,
+            text: `ต้องการ${actionText}อุปกรณ์ ${item.name} ใช่หรือไม่?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: `ใช่, ${actionText}`,
+            confirmButtonColor: newStatus === 'MAINTENANCE' ? '#d33' : '#10B981',
+            cancelButtonText: 'ยกเลิก'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await api.put(`/equipments/${item.id}`, { status: newStatus });
+                Swal.fire('สำเร็จ', `อัปเดตสถานะอุปกรณ์เป็น${newStatus}แล้ว`, 'success');
+                fetchEquipments();
+            } catch (error: any) {
+                Swal.fire('ผิดพลาด', error.response?.data?.message || 'ไม่สามารถอัปเดตสถานะได้', 'error');
+            }
+        }
+    };
+
     return (
         <div className="flex min-h-screen bg-gray-100 font-sans">
             <AdminSidebar />
@@ -225,9 +255,11 @@ export default function AdminEquipment() {
                                         <td className="px-6 py-4 font-medium text-gray-800">{item.name}</td>
                                         <td className="px-6 py-4 text-gray-500 font-mono text-sm">{item.serialNumber}</td>
                                         <td className="px-6 py-4 text-center">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.status === 'AVAILABLE' ? 'bg-green-100 text-green-800' :
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                item.status === 'AVAILABLE' ? 'bg-green-100 text-green-800' :
                                                 item.status === 'RESERVED' ? 'bg-orange-100 text-orange-800' :
-                                                    'bg-red-100 text-red-800'
+                                                item.status === 'MAINTENANCE' ? 'bg-gray-200 text-gray-700' :
+                                                'bg-red-100 text-red-800'
                                                 }`}>
                                                 {item.status}
                                             </span>
@@ -237,12 +269,23 @@ export default function AdminEquipment() {
                                                 <button
                                                     onClick={() => openModal(item)}
                                                     className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="แก้ไข"
                                                 >
                                                     <Edit size={18} />
                                                 </button>
+                                                {(item.status === 'AVAILABLE' || item.status === 'MAINTENANCE') && (
+                                                    <button
+                                                        onClick={() => handleToggleMaintenance(item)}
+                                                        className={`p-2 rounded-lg transition-colors ${item.status === 'MAINTENANCE' ? 'text-green-600 hover:bg-green-50' : 'text-gray-500 hover:bg-gray-100'}`}
+                                                        title={item.status === 'MAINTENANCE' ? 'เปิดใช้งาน' : 'ปิดปรับปรุง'}
+                                                    >
+                                                        <Wrench size={18} />
+                                                    </button>
+                                                )}
                                                 <button
                                                     onClick={() => handleDelete(item.id)}
                                                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                    title="ลบ"
                                                 >
                                                     <Trash2 size={18} />
                                                 </button>
