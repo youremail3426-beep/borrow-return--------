@@ -37,7 +37,8 @@ export default function AdminEquipment() {
             const filtered = allEquipments.filter(eq => 
                 eq && (
                     (eq.name && String(eq.name).toLowerCase().includes(lowerSearch)) || 
-                    (eq.serialNumber && String(eq.serialNumber).toLowerCase().includes(lowerSearch))
+                    (eq.serialNumber && String(eq.serialNumber).toLowerCase().includes(lowerSearch)) ||
+                    (eq.status && String(eq.status).toLowerCase().includes(lowerSearch))
                 )
             );
             setEquipments(filtered);
