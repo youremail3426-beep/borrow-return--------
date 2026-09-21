@@ -1,4 +1,4 @@
-import { Wrench, ShieldAlert } from 'lucide-react';
+import { Wrench, ShieldAlert, MessageCircle } from 'lucide-react';
 
 interface MaintenanceViewProps {
     message?: string;
@@ -28,9 +28,17 @@ export default function MaintenanceView({ message }: MaintenanceViewProps) {
                     {message || 'ขออภัยในความไม่สะดวก ระบบกำลังอยู่ในช่วงปิดปรับปรุง กรุณากลับมาใช้งานใหม่อีกครั้งในภายหลัง'}
                 </p>
                 
-                <div className="inline-flex items-center gap-3 bg-black/40 px-6 py-3 rounded-full border border-white/10 shadow-inner">
+                <div className="inline-flex items-center gap-3 bg-black/40 px-6 py-3 rounded-full border border-white/10 shadow-inner mb-8">
                     <ShieldAlert size={18} className="text-amber-400" />
                     <span className="text-sm text-amber-100/90 font-mono tracking-widest uppercase">System Status : Maintenance</span>
+                </div>
+
+                <div className="pt-8 border-t border-white/10 flex flex-col items-center gap-3">
+                    <p className="text-sm text-gray-400 font-light">หากมีเหตุฉุกเฉิน หรือต้องการติดต่อเร่งด่วน</p>
+                    <a href="https://www.facebook.com/SMOFTE" target="_blank" rel="noreferrer" className="group inline-flex items-center gap-3 px-6 py-3 bg-blue-600/10 hover:bg-blue-600/30 border border-blue-500/20 rounded-2xl transition-all duration-300">
+                        <MessageCircle size={20} className="text-blue-400 group-hover:text-blue-300 transition-colors" />
+                        <span className="text-blue-100/90 font-medium tracking-wide group-hover:text-white transition-colors">ติดต่อสโมสรนักศึกษาฯ (SMOFTE)</span>
+                    </a>
                 </div>
             </div>
 
