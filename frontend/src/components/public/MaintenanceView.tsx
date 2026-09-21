@@ -1,4 +1,4 @@
-import { Wrench, ShieldAlert, MessageCircle } from 'lucide-react';
+import { Wrench, ShieldAlert } from 'lucide-react';
 
 interface MaintenanceViewProps {
     message?: string;
@@ -34,11 +34,10 @@ export default function MaintenanceView({ message }: MaintenanceViewProps) {
                 </div>
 
                 <div className="pt-8 border-t border-white/10 flex flex-col items-center gap-3">
-                    <p className="text-sm text-gray-400 font-light">หากมีเหตุฉุกเฉิน หรือต้องการติดต่อเร่งด่วน</p>
-                    <a href="https://www.facebook.com/SMOFTE" target="_blank" rel="noreferrer" className="group inline-flex items-center gap-3 px-6 py-3 bg-blue-600/10 hover:bg-blue-600/30 border border-blue-500/20 rounded-2xl transition-all duration-300">
-                        <MessageCircle size={20} className="text-blue-400 group-hover:text-blue-300 transition-colors" />
-                        <span className="text-blue-100/90 font-medium tracking-wide group-hover:text-white transition-colors">ติดต่อสโมสรนักศึกษาฯ (SMOFTE)</span>
-                    </a>
+                    <p className="text-sm md:text-base text-gray-400 font-light leading-relaxed">
+                        ติดต่อสโมสรคณะครุศาสตร์อุตสาหกรรม มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ<br/>
+                        ขออภัยในความไม่สะดวก
+                    </p>
                 </div>
             </div>
 
