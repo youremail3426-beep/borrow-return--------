@@ -3,6 +3,7 @@ import AdminSidebar from '../../components/admin/AdminSidebar';
 import api from '../../services/api';
 import { History as HistoryIcon, Trash2, Printer, Search, ImagePlus, X } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { getDisplayImageUrl } from '../../utils/image';
 
 interface Transaction {
     id: string;
@@ -471,7 +472,7 @@ export default function AdminHistory() {
                                     />
                                     {conditionImageUrlPreview && (
                                         <div className="mt-3 relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden border">
-                                            <img src={conditionImageUrlPreview} className="w-full h-full object-contain" alt="preview" />
+                                            <img src={getDisplayImageUrl(conditionImageUrlPreview)} className="w-full h-full object-contain" alt="preview" />
                                         </div>
                                     )}
                                 </div>
