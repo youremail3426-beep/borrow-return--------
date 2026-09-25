@@ -56,8 +56,8 @@ export default function Home() {
             setEquipments(allEquipments);
         } else {
             const query = search.toLowerCase();
-            setEquipments(allEquipments.filter(item => 
-                (item?.name && String(item.name).toLowerCase().includes(query)) || 
+            setEquipments(allEquipments.filter(item =>
+                (item?.name && String(item.name).toLowerCase().includes(query)) ||
                 (item?.serialNumber && String(item.serialNumber).toLowerCase().includes(query))
             ));
         }
@@ -141,7 +141,7 @@ export default function Home() {
                                 {/* Decorative background elements */}
                                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-green-300 to-green-500 rounded-full opacity-20 blur-2xl group-hover:opacity-40 transition-opacity duration-500"></div>
                                 <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-tr from-green-200 to-green-400 rounded-full opacity-10 blur-2xl group-hover:opacity-30 transition-opacity duration-500"></div>
-                                
+
                                 <div className="relative z-10 bg-gradient-to-br from-green-400 to-green-600 text-white p-3 md:p-4 rounded-2xl flex-shrink-0 shadow-lg shadow-green-500/30 transform group-hover:scale-110 group-hover:-rotate-12 transition-all duration-300">
                                     <Megaphone size={26} className="animate-[pulse_3s_ease-in-out_infinite]" />
                                 </div>
@@ -179,15 +179,14 @@ export default function Home() {
                                 onClick={() => toggleSelection(item.id, item.status)}
                             >
                                 {/* Status Badge */}
-                                <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold shadow-sm z-10 ${
-                                    item.status === 'AVAILABLE' ? 'bg-green-100 text-green-700' :
-                                    item.status === 'RESERVED' ? 'bg-orange-100 text-orange-700' :
-                                    item.status === 'MAINTENANCE' ? 'bg-gray-200 text-gray-700' :
-                                    'bg-red-100 text-red-700'
+                                <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold shadow-sm z-10 ${item.status === 'AVAILABLE' ? 'bg-green-100 text-green-700' :
+                                        item.status === 'RESERVED' ? 'bg-orange-100 text-orange-700' :
+                                            item.status === 'MAINTENANCE' ? 'bg-gray-200 text-gray-700' :
+                                                'bg-red-100 text-red-700'
                                     }`}>
                                     {item.status === 'AVAILABLE' ? 'ว่าง' :
-                                     item.status === 'RESERVED' ? 'ถูกจอง' : 
-                                     item.status === 'MAINTENANCE' ? 'ปิดปรับปรุง' : 'ถูกยืม'}
+                                        item.status === 'RESERVED' ? 'ถูกจอง' :
+                                            item.status === 'MAINTENANCE' ? 'ปิดปรับปรุง' : 'ถูกยืม'}
                                 </div>
 
                                 {/* Image */}
@@ -196,7 +195,7 @@ export default function Home() {
                                         <>
                                             <img src={getDisplayImageUrl(item.imageUrl)} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                             {/* Full screen preview button */}
-                                            <button 
+                                            <button
                                                 onClick={(e) => { e.stopPropagation(); setPreviewImage(item.imageUrl || null); }}
                                                 className="absolute top-3 left-3 bg-black/40 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-md transition-colors z-20 shadow-md"
                                                 title="ดูรูปภาพเต็ม"
@@ -254,21 +253,21 @@ export default function Home() {
 
             {/* Image Preview Modal */}
             {previewImage && (
-                <div 
+                <div
                     className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fadeIn"
                     onClick={() => setPreviewImage(null)}
                 >
-                    <button 
+                    <button
                         className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors bg-black/20 p-2 rounded-full backdrop-blur-md"
                         onClick={() => setPreviewImage(null)}
                     >
                         <X size={32} />
                     </button>
-                    <img 
-                        src={getDisplayImageUrl(previewImage)} 
-                        alt="Preview" 
-                        className="max-w-[95vw] max-h-[90vh] object-contain rounded-lg shadow-2xl animate-scaleIn" 
-                        onClick={(e) => e.stopPropagation()} 
+                    <img
+                        src={getDisplayImageUrl(previewImage)}
+                        alt="Preview"
+                        className="max-w-[95vw] max-h-[90vh] object-contain rounded-lg shadow-2xl animate-scaleIn"
+                        onClick={(e) => e.stopPropagation()}
                     />
                 </div>
             )}
