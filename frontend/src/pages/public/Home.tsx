@@ -137,17 +137,17 @@ export default function Home() {
                 <div className="container mx-auto px-4 -mt-16 mb-10 relative z-20">
                     <div className="max-w-4xl mx-auto space-y-5">
                         {announcements.map((ann) => (
-                            <div key={ann.id} className="relative overflow-hidden bg-white/90 backdrop-blur-xl border border-amber-200/60 shadow-xl shadow-amber-500/10 rounded-2xl p-5 md:p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:border-amber-300 group flex gap-4 md:gap-5 items-start">
+                            <div key={ann.id} className="relative overflow-hidden bg-white/90 backdrop-blur-xl border border-green-200/60 shadow-xl shadow-green-500/10 rounded-2xl p-5 md:p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:border-green-300 group flex gap-4 md:gap-5 items-start">
                                 {/* Decorative background elements */}
-                                <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-amber-300 to-orange-400 rounded-full opacity-20 blur-2xl group-hover:opacity-40 transition-opacity duration-500"></div>
-                                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-tr from-yellow-300 to-amber-200 rounded-full opacity-10 blur-2xl group-hover:opacity-30 transition-opacity duration-500"></div>
+                                <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-green-300 to-green-500 rounded-full opacity-20 blur-2xl group-hover:opacity-40 transition-opacity duration-500"></div>
+                                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-tr from-green-200 to-green-400 rounded-full opacity-10 blur-2xl group-hover:opacity-30 transition-opacity duration-500"></div>
                                 
-                                <div className="relative z-10 bg-gradient-to-br from-amber-400 to-orange-500 text-white p-3 md:p-4 rounded-2xl flex-shrink-0 shadow-lg shadow-orange-500/30 transform group-hover:scale-110 group-hover:-rotate-12 transition-all duration-300">
+                                <div className="relative z-10 bg-gradient-to-br from-green-400 to-green-600 text-white p-3 md:p-4 rounded-2xl flex-shrink-0 shadow-lg shadow-green-500/30 transform group-hover:scale-110 group-hover:-rotate-12 transition-all duration-300">
                                     <Megaphone size={26} className="animate-[pulse_3s_ease-in-out_infinite]" />
                                 </div>
                                 <div className="relative z-10 flex-1">
                                     <div className="flex items-center gap-2 mb-2">
-                                        <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] sm:text-xs font-bold tracking-wider uppercase shadow-sm border border-amber-200/50">
+                                        <span className="px-2.5 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] sm:text-xs font-bold tracking-wider uppercase shadow-sm border border-green-200/50">
                                             ประกาศ
                                         </span>
                                         {ann.createdAt && (
@@ -156,7 +156,7 @@ export default function Home() {
                                             </span>
                                         )}
                                     </div>
-                                    <h3 className="font-bold text-gray-800 text-xl md:text-2xl mb-2 group-hover:text-amber-600 transition-colors">{ann.title}</h3>
+                                    <h3 className="font-bold text-gray-800 text-xl md:text-2xl mb-2 group-hover:text-green-600 transition-colors">{ann.title}</h3>
                                     <p className="text-gray-600 whitespace-pre-wrap leading-relaxed text-sm md:text-base">{ann.content}</p>
                                 </div>
                             </div>
