@@ -41,13 +41,13 @@ export default function Home() {
     const { data: systemSettings } = useSWR<{ SYSTEM_STATUS: string, MAINTENANCE_MESSAGE: string }>('/settings', fetcher);
     
     const { data: rawEquipments, isLoading: loading } = useSWR<Equipment[]>('/equipments', fetcher, { 
-        revalidateOnFocus: false,
-        keepPreviousData: true
+        keepPreviousData: true,
+        refreshInterval: 30000 // Refresh every 30 seconds
     });
     const allEquipments = Array.isArray(rawEquipments) ? rawEquipments : [];
 
-    const { data: rawAnnouncements } = useSWR<Announcement[]>('/announcements', fetcher, { 
-        revalidateOnFocus: false 
+    const { data: rawAnnouncements } = useSWR<Announcement[]>('/announcements', fetcher, {
+        refreshInterval: 60000 // Refresh every 1 minute
     });
     const allAnnouncements = Array.isArray(rawAnnouncements) ? rawAnnouncements : [];
     
