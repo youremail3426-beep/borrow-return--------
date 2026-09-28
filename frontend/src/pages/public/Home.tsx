@@ -38,14 +38,18 @@ export default function Home() {
 
     const fetcher = (url: string) => api.get(url).then(res => res.data);
 
-    const { data: systemSettings } = useSWR('/settings', fetcher);
-    const { data: allEquipments = [], isLoading: loading } = useSWR('/equipments', fetcher, { 
+    const { data: systemSettings } = useSWR<{ SYSTEM_STATUS: string, MAINTENANCE_MESSAGE: string }>('/settings', fetcher);
+    
+    const { data: rawEquipments, isLoading: loading } = useSWR<Equipment[]>('/equipments', fetcher, { 
         revalidateOnFocus: false,
         keepPreviousData: true
     });
-    const { data: allAnnouncements = [] } = useSWR('/announcements', fetcher, { 
+    const allEquipments = Array.isArray(rawEquipments) ? rawEquipments : [];
+
+    const { data: rawAnnouncements } = useSWR<Announcement[]>('/announcements', fetcher, { 
         revalidateOnFocus: false 
     });
+    const allAnnouncements = Array.isArray(rawAnnouncements) ? rawAnnouncements : [];
     
     const announcements = useMemo(() => {
         return allAnnouncements.filter((a: Announcement) => a.isActive);
@@ -141,7 +145,7 @@ export default function Home() {
                     <div className="text-center py-20 text-gray-500">กำลังโหลดข้อมูล...</div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {equipments.map(item => (
+                        {equipments.map((item: Equipment) => (
                             <div
                                 key={item.id}
                                 className={`bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-all cursor-pointer relative group ${selectedItems.includes(item.id) ? 'ring-2 ring-primary border-primary' : 'border-gray-100'
