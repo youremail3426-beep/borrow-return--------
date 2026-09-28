@@ -231,6 +231,18 @@ const Reservation = {
     // Mark reservation as completed
     Database.update(this.SHEET_NAME, id, { status: 'COMPLETED' });
 
+    // Send Email
+    try {
+      const borrower = Database.getById('Borrowers', reservation.borrowerId);
+      if (borrower && borrower.email) {
+        const allEq = Database.getAll('Equipments');
+        const populatedItems = items.map(i => allEq.find(e => e.id === i.equipmentId)).filter(e => e);
+        Email.sendBorrowEmail(borrower.email, borrower.name, transaction, populatedItems);
+      }
+    } catch (e) {
+      console.error("Failed to send borrow email", e);
+    }
+
     return { success: true };
   },
 
