@@ -27,11 +27,22 @@ export default function AdminBorrowers() {
         fetchBorrowers();
     }, []);
 
-    const fetchBorrowers = async () => {
+    const fetchBorrowers = async (currentQuery = searchQuery) => {
         try {
             const res = await api.get('/borrowers');
             setBorrowers(res.data);
-            setFiltered(res.data);
+            
+            if (currentQuery) {
+                const query = currentQuery.toLowerCase();
+                const result = res.data.filter((b: Borrower) => 
+                    (b.name && b.name.toLowerCase().includes(query)) ||
+                    (b.email && b.email.toLowerCase().includes(query)) ||
+                    (b.studentId && b.studentId.toLowerCase().includes(query))
+                );
+                setFiltered(result);
+            } else {
+                setFiltered(res.data);
+            }
         } catch (error) {
             console.error('Error fetching borrowers:', error);
             Swal.fire('Error', 'ไม่สามารถโหลดข้อมูลผู้ยืมได้', 'error');

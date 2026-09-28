@@ -27,6 +27,8 @@ export default function AdminBorrowReturn() {
             phoneNumber: '',
             borrowDate: borrowDateValue,
             dueDate: dueDateValue,
+            isSuspended: false,
+            suspensionReason: ''
         };
     });
     const [searchQuery, setSearchQuery] = useState('');
@@ -113,6 +115,7 @@ export default function AdminBorrowReturn() {
     };
 
     const handleBorrow = () => {
+        if (borrowData.isSuspended) return Swal.fire('แจ้งเตือน', 'ผู้ใช้นี้ถูกระงับสิทธิ์ ไม่สามารถให้ยืมได้', 'error');
         if (!borrowData.borrowerName || !borrowData.borrowerEmail || !borrowData.dueDate || !borrowData.phoneNumber) return Swal.fire('แจ้งเตือน', 'กรุณากรอกข้อมูลให้ครบ', 'warning');
         if (selectedEquipments.length === 0) return Swal.fire('แจ้งเตือน', 'เลือกอุปกรณ์อย่างน้อย 1 ชิ้น', 'warning');
 
@@ -146,7 +149,9 @@ export default function AdminBorrowReturn() {
                 return {
                     borrowerName: '', borrowerEmail: '', studentId: '', yearLevel: '', department: '', faculty: '', phoneNumber: '',
                     borrowDate: today.toISOString().split('T')[0],
-                    dueDate: due.toISOString().split('T')[0]
+                    dueDate: due.toISOString().split('T')[0],
+                    isSuspended: false,
+                    suspensionReason: ''
                 };
             });
             setSelectedEquipments([]);
@@ -195,6 +200,8 @@ export default function AdminBorrowReturn() {
                     department: res.data.department || prev.department,
                     faculty: res.data.faculty || prev.faculty,
                     phoneNumber: res.data.phoneNumber || prev.phoneNumber,
+                    isSuspended: res.data.isSuspended || false,
+                    suspensionReason: res.data.suspensionReason || ''
                 }));
 
                 if (res.data.isSuspended) {
@@ -329,6 +336,18 @@ export default function AdminBorrowReturn() {
                             // --- BORROW UI (UNCHANGED MOSTLY) ---
                             <div className="space-y-5">
                                 <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-700 mb-4">สำหรับการยืมแบบ Walk-in หรือ Admin ทำให้โดยตรง</div>
+                                
+                                {borrowData.isSuspended && (
+                                    <div className="bg-red-100 border border-red-200 p-4 rounded-lg text-red-700 flex items-start gap-3 animate-pulse">
+                                        <X className="mt-0.5 flex-shrink-0" size={20} />
+                                        <div>
+                                            <div className="font-bold mb-1">ผู้ใช้นี้กำลังถูกระงับสิทธิ์การใช้งาน</div>
+                                            <div className="text-sm">สาเหตุ: {borrowData.suspensionReason || 'ไม่ระบุ'}</div>
+                                            <div className="text-xs mt-1 text-red-500">* ระบบจะไม่อนุญาตให้บันทึกการยืมสำหรับผู้ใช้นี้</div>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div className="md:col-span-1">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">ชื่อ-นามสกุล</label>
@@ -549,12 +568,12 @@ export default function AdminBorrowReturn() {
 
                                 <button
                                     onClick={handleBorrow}
-                                    disabled={isLoading}
+                                    disabled={isLoading || borrowData.isSuspended}
                                     className={`w-full font-bold py-3 rounded-xl shadow-lg mt-2 transition-all
-                                        ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-secondary text-white'}
+                                        ${isLoading || borrowData.isSuspended ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-secondary text-white'}
                                     `}
                                 >
-                                    {isLoading ? '⏳ กำลังบันทึก... กรุณารอสักครู่' : 'ยืนยันการยืม'}
+                                    {isLoading ? '⏳ กำลังบันทึก... กรุณารอสักครู่' : borrowData.isSuspended ? 'ระงับสิทธิ์การยืม' : 'ยืนยันการยืม'}
                                 </button>
                             </div>
                         ) : (
