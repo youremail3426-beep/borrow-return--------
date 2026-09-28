@@ -21,7 +21,6 @@ interface Equipment {
     name: string;
     serialNumber: string;
     imageUrl?: string;
-    imageUrl?: string;
     status: 'AVAILABLE' | 'RESERVED' | 'BORROWED' | 'MAINTENANCE' | 'PENDING';
 }
 
