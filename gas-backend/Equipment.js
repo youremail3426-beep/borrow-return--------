@@ -5,7 +5,24 @@ const Equipment = {
   SHEET_NAME: 'Equipments',
 
   getAll() {
-    return Database.getAll(this.SHEET_NAME);
+    const equipments = Database.getAll(this.SHEET_NAME);
+    const reservations = Database.getAll('Reservations');
+    const resItems = Database.getAll('ReservationItems');
+
+    const pendingResIds = reservations.filter(r => r.status === 'PENDING').map(r => r.id);
+    const pendingEqIds = new Set();
+    resItems.forEach(item => {
+      if (pendingResIds.includes(item.reservationId)) {
+        pendingEqIds.add(item.equipmentId);
+      }
+    });
+
+    return equipments.map(eq => {
+      if (eq.status === 'AVAILABLE' && pendingEqIds.has(eq.id)) {
+        return { ...eq, status: 'PENDING' };
+      }
+      return eq;
+    });
   },
 
   getById(id) {

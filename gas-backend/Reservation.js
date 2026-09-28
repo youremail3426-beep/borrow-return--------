@@ -134,8 +134,6 @@ const Reservation = {
         reservationId: newRes.id,
         equipmentId: eqId
       });
-      // Optionally update equipment status to RESERVED
-      Equipment.update(eqId, { status: 'RESERVED' });
 
       const eq = allEq.find(e => e.id === eqId);
       if (eq) reservedItemsList.push({ equipment: eq });
@@ -170,10 +168,13 @@ const Reservation = {
 
     const items = Database.find(this.ITEMS_SHEET, 'reservationId', id);
 
-    // If rejected, free up the equipment
     if (status === 'REJECTED') {
       items.forEach(item => {
         Equipment.update(item.equipmentId, { status: 'AVAILABLE' });
+      });
+    } else if (status === 'APPROVED') {
+      items.forEach(item => {
+        Equipment.update(item.equipmentId, { status: 'RESERVED' });
       });
     }
 
