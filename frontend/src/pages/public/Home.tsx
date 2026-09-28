@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import useSWR from 'swr';
 import Navbar from '../../components/public/Navbar';
 import api from '../../services/api';
 import { Search, Info, ZoomIn, X, Wrench } from 'lucide-react';
@@ -24,8 +25,6 @@ interface Equipment {
 }
 
 export default function Home() {
-    const [allEquipments, setAllEquipments] = useState<Equipment[]>([]);
-    const [equipments, setEquipments] = useState<Equipment[]>([]);
     const [search, setSearch] = useState('');
     const [selectedItems, setSelectedItems] = useState<string[]>(() => {
         try {
@@ -35,65 +34,36 @@ export default function Home() {
             return [];
         }
     });
-    const [loading, setLoading] = useState(true);
-    const [announcements, setAnnouncements] = useState<Announcement[]>([]);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
-    const [systemSettings, setSystemSettings] = useState<{ SYSTEM_STATUS: string, MAINTENANCE_MESSAGE: string } | null>(null);
+
+    const fetcher = (url: string) => api.get(url).then(res => res.data);
+
+    const { data: systemSettings } = useSWR('/settings', fetcher);
+    const { data: allEquipments = [], isLoading: loading } = useSWR('/equipments', fetcher, { 
+        revalidateOnFocus: false,
+        keepPreviousData: true
+    });
+    const { data: allAnnouncements = [] } = useSWR('/announcements', fetcher, { 
+        revalidateOnFocus: false 
+    });
+    
+    const announcements = useMemo(() => {
+        return allAnnouncements.filter((a: Announcement) => a.isActive);
+    }, [allAnnouncements]);
+
+    const equipments = useMemo(() => {
+        if (!search) return allEquipments;
+        const query = search.toLowerCase();
+        return allEquipments.filter((item: Equipment) =>
+            (item?.name && String(item.name).toLowerCase().includes(query)) ||
+            (item?.serialNumber && String(item.serialNumber).toLowerCase().includes(query))
+        );
+    }, [search, allEquipments]);
 
     useEffect(() => {
         localStorage.setItem('cartItems', JSON.stringify(selectedItems));
         window.dispatchEvent(new Event('cartUpdated'));
     }, [selectedItems]);
-
-    useEffect(() => {
-        fetchSettings();
-        fetchEquipments();
-        fetchAnnouncements();
-    }, []);
-
-    useEffect(() => {
-        if (!search) {
-            setEquipments(allEquipments);
-        } else {
-            const query = search.toLowerCase();
-            setEquipments(allEquipments.filter(item =>
-                (item?.name && String(item.name).toLowerCase().includes(query)) ||
-                (item?.serialNumber && String(item.serialNumber).toLowerCase().includes(query))
-            ));
-        }
-    }, [search, allEquipments]);
-
-    const fetchSettings = async () => {
-        try {
-            const res = await api.get('/settings');
-            setSystemSettings(res.data);
-        } catch (error) {
-            console.error('Error fetching settings:', error);
-        }
-    };
-
-    const fetchEquipments = async () => {
-        try {
-            const res = await api.get('/equipments');
-            setAllEquipments(res.data);
-            setEquipments(res.data);
-        } catch (error) {
-            console.error('Error fetching equipments:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchAnnouncements = async () => {
-        try {
-            const res = await api.get('/announcements');
-            // Filter only active announcements
-            const active = res.data.filter((a: Announcement) => a.isActive);
-            setAnnouncements(active);
-        } catch (error) {
-            console.error('Error fetching announcements:', error);
-        }
-    };
 
     const toggleSelection = (id: string, status: string) => {
         if (status !== 'AVAILABLE') return;
@@ -193,7 +163,7 @@ export default function Home() {
                                 <div className="h-48 bg-gray-100 overflow-hidden relative">
                                     {item.imageUrl ? (
                                         <>
-                                            <img src={getDisplayImageUrl(item.imageUrl)} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                            <img src={getDisplayImageUrl(item.imageUrl)} alt={item.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                             {/* Full screen preview button */}
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); setPreviewImage(item.imageUrl || null); }}
