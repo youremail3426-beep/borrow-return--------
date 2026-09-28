@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../prisma';
 import { sendReservationPending, sendReservationStatus, sendBorrowConfirmation, sendAdminNewReservationNotification } from '../services/email.service';
 import { AuthRequest } from '../middleware/auth';
+import { equipmentCache } from './equipment.controller';
 
 const getStartOfTodayLocal = () => {
     const d = new Date();
@@ -237,6 +238,7 @@ export const updateReservationStatus = async (req: Request, res: Response) => {
                     data: { status: 'RESERVED' }
                 })
             ]);
+            equipmentCache.flushAll();
         } else if (status === 'REJECTED') {
             await prisma.reservation.update({ where: { id }, data: { status: 'REJECTED' } });
             // Ensure equipment is available (if it was reserved? logic usually keeps it available until approved)
@@ -248,6 +250,7 @@ export const updateReservationStatus = async (req: Request, res: Response) => {
                     where: { id: { in: equipmentIds } },
                     data: { status: 'AVAILABLE' }
                 });
+                equipmentCache.flushAll();
             }
         }
 
@@ -309,6 +312,7 @@ export const confirmPickup = async (req: Request, res: Response) => {
                 where: { id: { in: reservation.items.map(i => i.equipmentId) } },
                 data: { status: 'BORROWED' }
             });
+            equipmentCache.flushAll();
 
             // 3. Update Reservation Status -> COMPLETED
             await tx.reservation.update({
@@ -360,6 +364,7 @@ export const deleteReservation = async (req: Request, res: Response) => {
                 where: { id: { in: equipmentIds } },
                 data: { status: 'AVAILABLE' }
             });
+            equipmentCache.flushAll();
         }
 
         await prisma.reservation.delete({
@@ -402,6 +407,7 @@ export const deleteReservations = async (req: Request, res: Response) => {
                 where: { id: { in: equipmentToRevert } },
                 data: { status: 'AVAILABLE' }
             });
+            equipmentCache.flushAll();
         }
 
         // Delete reservations

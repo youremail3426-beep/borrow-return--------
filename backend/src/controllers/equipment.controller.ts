@@ -3,7 +3,7 @@ import prisma from '../prisma';
 import cloudinary from '../services/cloudinary';
 import NodeCache from 'node-cache';
 
-const equipmentCache = new NodeCache({ stdTTL: 600 }); // Cache for 10 minutes
+export const equipmentCache = new NodeCache({ stdTTL: 600 }); // Cache for 10 minutes
 
 // Public: Get all equipments with search
 export const getEquipments = async (req: Request, res: Response) => {

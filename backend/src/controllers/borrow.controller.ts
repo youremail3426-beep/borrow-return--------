@@ -3,6 +3,7 @@ import prisma from '../prisma';
 import cloudinary from '../services/cloudinary';
 import { sendReturnReceipt, sendBorrowConfirmation } from '../services/email.service';
 import { AuthRequest } from '../middleware/auth';
+import { equipmentCache } from './equipment.controller';
 
 const getStartOfTodayLocal = () => {
     const d = new Date();
@@ -102,6 +103,7 @@ export const borrowItems = async (req: Request, res: Response) => {
             where: { id: { in: equipmentIds } },
             data: { status: 'BORROWED' }
         });
+        equipmentCache.flushAll();
 
         // Fetch equipment names for email
         const equipmentList = await prisma.equipment.findMany({
@@ -161,6 +163,7 @@ export const returnItems = async (req: Request, res: Response) => {
             where: { id: { in: equipmentIds } },
             data: { status: 'AVAILABLE' }
         });
+        equipmentCache.flushAll();
 
         // 4. Update BorrowItems -> returnedAt = now
         const now = new Date();
@@ -303,6 +306,7 @@ export const deleteTransaction = async (req: Request, res: Response) => {
                 where: { id: { in: activeItems.map(i => i.equipmentId) } },
                 data: { status: 'AVAILABLE' }
             });
+            equipmentCache.flushAll();
         }
 
         await prisma.borrowTransaction.delete({
@@ -340,6 +344,7 @@ export const deleteTransactions = async (req: Request, res: Response) => {
                 where: { id: { in: equipmentIds } },
                 data: { status: 'AVAILABLE' }
             });
+            equipmentCache.flushAll();
         }
 
         // 2. Delete Transactions
