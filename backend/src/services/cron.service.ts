@@ -1,5 +1,6 @@
 import prisma from '../prisma';
 import { sendDueDateReminder, sendOverdueWarning, sendSuspensionMissedPickup, sendSuspensionOverdue } from './email.service';
+import { equipmentCache } from '../controllers/equipment.controller';
 
 const calculateOverdueWorkingDays = (startDate: Date, endDate: Date): number => {
     let count = 0;
@@ -72,6 +73,7 @@ export const checkDueDates = async () => {
                 where: { id: { in: equipmentIds } },
                 data: { status: 'AVAILABLE' }
             });
+            equipmentCache.flushAll();
 
             // Suspend borrower for 3 days
             const suspendedUntil = new Date(now);
