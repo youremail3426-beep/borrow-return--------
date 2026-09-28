@@ -241,9 +241,7 @@ export const updateReservationStatus = async (req: Request, res: Response) => {
             equipmentCache.flushAll();
         } else if (status === 'REJECTED') {
             await prisma.reservation.update({ where: { id }, data: { status: 'REJECTED' } });
-            // Ensure equipment is available (if it was reserved? logic usually keeps it available until approved)
-            // If we were reserving on create, we would release here. But we reserve on Approve.
-            // If previously approved, we need to release.
+            // Ensure equipment is available
             if (reservation.status === 'APPROVED') {
                 const equipmentIds = reservation.items.map(i => i.equipmentId);
                 await prisma.equipment.updateMany({
@@ -357,8 +355,8 @@ export const deleteReservation = async (req: Request, res: Response) => {
             return res.status(404).json({ error: 'Reservation not found' });
         }
 
-        // If Approved, we must release equipment back to AVAILABLE
-        if (reservation.status === 'APPROVED') {
+        // We must release equipment back to AVAILABLE if it was actively reserved
+        if (reservation.status === 'APPROVED' || reservation.status === 'PENDING') {
             const equipmentIds = reservation.items.map(i => i.equipmentId);
             await prisma.equipment.updateMany({
                 where: { id: { in: equipmentIds } },
@@ -393,10 +391,10 @@ export const deleteReservations = async (req: Request, res: Response) => {
             include: { items: true }
         });
 
-        // Collect equipment IDs to revert from APPROVED reservations
+        // Collect equipment IDs to revert from active reservations
         const equipmentToRevert: string[] = [];
         reservationsToDelete.forEach(res => {
-            if (res.status === 'APPROVED') {
+            if (res.status === 'APPROVED' || res.status === 'PENDING') {
                 res.items.forEach(item => equipmentToRevert.push(item.equipmentId));
             }
         });

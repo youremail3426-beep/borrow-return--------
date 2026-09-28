@@ -9,7 +9,7 @@ interface Equipment {
     id: string;
     name: string;
     serialNumber: string;
-    status: 'AVAILABLE' | 'RESERVED' | 'BORROWED' | 'MAINTENANCE';
+    status: 'AVAILABLE' | 'RESERVED' | 'BORROWED' | 'MAINTENANCE' | 'PENDING';
     imageUrl?: string;
 }
 
@@ -259,10 +259,11 @@ export default function AdminEquipment() {
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                                 item.status === 'AVAILABLE' ? 'bg-green-100 text-green-800' :
                                                 item.status === 'RESERVED' ? 'bg-orange-100 text-orange-800' :
+                                                item.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
                                                 item.status === 'MAINTENANCE' ? 'bg-gray-200 text-gray-700' :
                                                 'bg-red-100 text-red-800'
                                                 }`}>
-                                                {item.status}
+                                                {item.status === 'PENDING' ? 'รออนุมัติ' : item.status}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">

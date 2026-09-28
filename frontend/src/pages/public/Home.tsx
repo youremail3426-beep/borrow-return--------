@@ -21,7 +21,8 @@ interface Equipment {
     name: string;
     serialNumber: string;
     imageUrl?: string;
-    status: 'AVAILABLE' | 'RESERVED' | 'BORROWED' | 'MAINTENANCE';
+    imageUrl?: string;
+    status: 'AVAILABLE' | 'RESERVED' | 'BORROWED' | 'MAINTENANCE' | 'PENDING';
 }
 
 export default function Home() {
@@ -153,14 +154,17 @@ export default function Home() {
                                 onClick={() => toggleSelection(item.id, item.status)}
                             >
                                 {/* Status Badge */}
-                                <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold shadow-sm z-10 ${item.status === 'AVAILABLE' ? 'bg-green-100 text-green-700' :
-                                        item.status === 'RESERVED' ? 'bg-orange-100 text-orange-700' :
-                                            item.status === 'MAINTENANCE' ? 'bg-gray-200 text-gray-700' :
-                                                'bg-red-100 text-red-700'
-                                    }`}>
+                                <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold shadow-sm z-10 ${
+                                    item.status === 'AVAILABLE' ? 'bg-green-100 text-green-700' :
+                                    item.status === 'RESERVED' ? 'bg-orange-100 text-orange-700' :
+                                    item.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                                    item.status === 'MAINTENANCE' ? 'bg-gray-200 text-gray-700' :
+                                    'bg-red-100 text-red-700'
+                                }`}>
                                     {item.status === 'AVAILABLE' ? 'ว่าง' :
-                                        item.status === 'RESERVED' ? 'ถูกจอง' :
-                                            item.status === 'MAINTENANCE' ? 'ปิดปรับปรุง' : 'ถูกยืม'}
+                                     item.status === 'RESERVED' ? 'ถูกจอง' :
+                                     item.status === 'PENDING' ? 'รออนุมัติ' :
+                                     item.status === 'MAINTENANCE' ? 'ปิดปรับปรุง' : 'ถูกยืม'}
                                 </div>
 
                                 {/* Image */}

@@ -36,11 +36,27 @@ export const getEquipments = async (req: Request, res: Response) => {
 
         const equipments = await prisma.equipment.findMany({
             where,
+            include: {
+                reservationItems: {
+                    where: { reservation: { status: 'PENDING' } },
+                    take: 1
+                }
+            },
             orderBy: { createdAt: 'desc' }
         });
 
-        equipmentCache.set(cacheKey, equipments);
-        res.json(equipments);
+        // Map status dynamically
+        const formattedEquipments = equipments.map(eq => {
+            const hasPending = eq.reservationItems && eq.reservationItems.length > 0;
+            const { reservationItems, ...rest } = eq;
+            return {
+                ...rest,
+                status: (eq.status === 'AVAILABLE' && hasPending) ? 'PENDING' : eq.status
+            };
+        });
+
+        equipmentCache.set(cacheKey, formattedEquipments);
+        res.json(formattedEquipments);
     } catch (error: any) {
         console.error("Get Equipments Error:", error);
         res.status(500).json({ error: 'Failed to fetch equipments', details: error.message });
