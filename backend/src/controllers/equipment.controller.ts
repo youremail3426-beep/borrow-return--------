@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import prisma from '../prisma';
 import cloudinary from '../services/cloudinary';
+import NodeCache from 'node-cache';
+
+const equipmentCache = new NodeCache({ stdTTL: 600 }); // Cache for 10 minutes
 
 // Public: Get all equipments with search
 export const getEquipments = async (req: Request, res: Response) => {
@@ -24,10 +27,19 @@ export const getEquipments = async (req: Request, res: Response) => {
             where.id = { in: idList };
         }
 
+        const cacheKey = `equipments_${search || ''}_${status || ''}_${req.query.ids || ''}`;
+        const cachedData = equipmentCache.get(cacheKey);
+
+        if (cachedData) {
+            return res.json(cachedData);
+        }
+
         const equipments = await prisma.equipment.findMany({
             where,
             orderBy: { createdAt: 'desc' }
         });
+
+        equipmentCache.set(cacheKey, equipments);
         res.json(equipments);
     } catch (error: any) {
         console.error("Get Equipments Error:", error);
@@ -39,8 +51,17 @@ export const getEquipments = async (req: Request, res: Response) => {
 export const getEquipmentById = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
+        const cacheKey = `equipment_${id}`;
+        const cachedData = equipmentCache.get(cacheKey);
+
+        if (cachedData) {
+            return res.json(cachedData);
+        }
+
         const equipment = await prisma.equipment.findUnique({ where: { id } });
         if (!equipment) return res.status(404).json({ error: 'Not found' });
+
+        equipmentCache.set(cacheKey, equipment);
         res.json(equipment);
     } catch (error) {
         res.status(500).json({ error: 'Error fetching equipment' });
@@ -71,6 +92,7 @@ export const createEquipment = async (req: Request, res: Response) => {
                 status: 'AVAILABLE'
             }
         });
+        equipmentCache.flushAll(); // Clear cache when new equipment is created
         res.json(equipment);
     } catch (error: any) {
         console.error(error);
@@ -105,6 +127,7 @@ export const updateEquipment = async (req: Request, res: Response) => {
             where: { id },
             data: updateData
         });
+        equipmentCache.flushAll(); // Clear cache on update
         res.json(equipment);
     } catch (error) {
         res.status(500).json({ error: 'Update failed' });
@@ -134,6 +157,7 @@ export const deleteEquipment = async (req: Request, res: Response) => {
             });
         });
 
+        equipmentCache.flushAll(); // Clear cache on delete
         res.json({ message: 'Equipment and related data deleted successfully' });
     } catch (error: any) {
         console.error("Delete Error details:", error);

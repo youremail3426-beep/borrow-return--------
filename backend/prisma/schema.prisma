@@ -56,6 +56,9 @@ model Equipment {
   // Relations
   reservationItems ReservationItem[]
   borrowItems      BorrowItem[]
+
+  @@index([status])
+  @@index([name])
 }
 
 model Reservation {
